@@ -1,0 +1,47 @@
+import os
+import pprint
+import random
+import warnings
+import torch
+import numpy as np
+from trainer import Trainer, Tester
+from inference import Inference
+
+from config import getConfig
+warnings.filterwarnings('ignore')
+
+args = getConfig()
+pprint.pprint(args)
+
+def find_mask(*args):
+    args = getConfig()
+    print('<---- Training Params ---->')
+    # pprint.pprint(args)
+
+    # Random Seed
+    seed = 42
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    
+
+    args.model_path = 'results/'
+    args.dataset = 'upload/'
+    args.arch = '7'
+    args.exp_num = 0
+
+    save_path = os.path.join(args.model_path, args.dataset, f'TE{args.arch}_{str(args.exp_num)}')
+
+    print('<----- Initializing inference mode ----->')
+    Inference(args, save_path).test()
+
+
+if __name__ == '__main__':
+    # find_mask()
+    pass

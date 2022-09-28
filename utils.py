@@ -1,3 +1,4 @@
+
 # Backlit
 import matplotlib.pyplot as plt
 import os
@@ -18,7 +19,6 @@ from imutils import paths
 import argparse
 
 
-#@title Backlit
 def backlit_detect(img, threshold=0.5):
     img_ycbcr = color.rgb2ycbcr(img)
     h, w, c = img_ycbcr.shape
@@ -67,7 +67,6 @@ def backlit_detect(img, threshold=0.5):
 
 
 
-#@title Layout
 def get_bbox(thresh, img):
     # find conneted component, coordinate bbox
     num_labels, labels, stats, centers = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
@@ -180,7 +179,7 @@ def detect_layout(img_rgb, img_gray):
                 return "No Layout"
 
 
-#@title contrast
+
 def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percentile=99):
    
     from skimage.util.dtype import dtype_range, dtype_limits
@@ -201,7 +200,7 @@ def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percent
     if ratio > threshold: 
         ratio = _max
     else:
-        ratio = ratio - 0.3
+        ratio = ratio
         if ratio < 0: ratio = 0
 
     percent = 100 - (ratio / _max * 100)
@@ -209,7 +208,7 @@ def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percent
     return percent
 
 
-#@title Blur
+
 def percent_blur_(img, threshold=1000):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     fm = cv2.Laplacian(gray, cv2.CV_64F).var()
@@ -246,19 +245,26 @@ def assessImage(path_image, path_pred_map):
     percent_blur = percent_blur_(img)
     
     # Write assess
-    color = (255, 0, 0)
-    cv2.putText(img, "Backlit: {:.0f}%".format(percent_backlit), (10, 30),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    cv2.putText(img, "Layout: {}".format(layout), (10, 55),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    cv2.putText(img, "Low contrast: {:.0f}%".format(percent_lcontrast), (10, 80),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    cv2.putText(img, "Blur: {:.0f}%".format(percent_blur), (10, 105),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+    # color = (255, 0, 0)
+    # cv2.putText(img, "Backlit: {:.0f}%".format(percent_backlit), (10, 30),
+    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+    # cv2.putText(img, "Layout: {}".format(layout), (10, 55),
+    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+    # cv2.putText(img, "Low contrast: {:.0f}%".format(percent_lcontrast), (10, 80),
+    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+    # cv2.putText(img, "Blur: {:.0f}%".format(percent_blur), (10, 105),
+    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
     
-    plt.figure(figsize=(10, 8))
-    plt.imshow(img[:,:,::-1])
-    plt.axis('off')
-    plt.show()
+    # plt.figure(figsize=(10, 8))
+    # plt.imshow(img[:,:,::-1])
+    # plt.axis('off')
+    # plt.show()
+    
+    rst = { 
+            'Backlit': percent_backlit,
+            'Low contrast': percent_lcontrast,
+            'Blur': percent_blur,
+            'Layout': layout
+           }
 
-
+    return rst
