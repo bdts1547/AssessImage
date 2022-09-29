@@ -11,7 +11,7 @@ from config import getConfig
 warnings.filterwarnings('ignore')
 
 args = getConfig()
-pprint.pprint(args)
+# pprint.pprint(args)
 
 def find_mask(*args):
     args = getConfig()
@@ -19,7 +19,7 @@ def find_mask(*args):
     # pprint.pprint(args)
 
     # Random Seed
-    seed = 42
+    seed = args.seed
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -37,7 +37,6 @@ def find_mask(*args):
     # args.exp_num = 0
 
     save_path = os.path.join(args.model_path, args.dataset, f'TE{args.arch}_{str(args.exp_num)}')
-
     print('<----- Initializing inference mode ----->')
     Inference(args, save_path).test()
 

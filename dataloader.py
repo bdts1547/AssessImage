@@ -8,6 +8,8 @@ from albumentations.pytorch.transforms import ToTensorV2
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
+import sys, os
+
 
 class DatasetGenerate(Dataset):
     def __init__(self, img_folder, gt_folder, edge_folder, phase: str = 'train', transform=None, seed=None):
@@ -55,22 +57,16 @@ class DatasetGenerate(Dataset):
 
 class Test_DatasetGenerate(Dataset):
     def __init__(self, img_folder, gt_folder=None, transform=None):
-        self.images = sorted(glob.glob(img_folder + '\*'))
-        print(self.images)
-        self.gts = sorted(glob.glob(gt_folder + '\*')) if gt_folder is not None else None
+        self.images = sorted(glob.glob(img_folder + '/*'))
+        self.gts = sorted(glob.glob(gt_folder + '/*')) if gt_folder is not None else None
         self.transform = transform
 
     def __getitem__(self, idx):
-        print(self.images[idx], idx)
         
-        # breakpoint()
-        a = 'data\\upload\\1.png'
-
         image_name = Path(self.images[idx]).stem
         image = cv2.imread(self.images[idx])
-        image = cv2.imread(a)
-        print('a = ', a)
-        print("===", image)
+        # print(os.path.abspath(self.images[idx]))
+        # image = cv2.imread(os.path.abspath(self.images[idx]))
 
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

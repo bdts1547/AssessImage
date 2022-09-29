@@ -35,6 +35,7 @@ class Inference():
         te_img_folder = os.path.join(args.data_path, args.dataset)
         te_gt_folder = None
 
+
         self.test_loader = get_loader(te_img_folder, te_gt_folder, edge_folder=None, phase='test',
                                       batch_size=args.batch_size, shuffle=False,
                                       num_workers=args.num_workers, transform=self.test_transform)
@@ -49,7 +50,6 @@ class Inference():
         t = time.time()
 
         with torch.no_grad():
-            print('123')
             for i, (images, original_size, image_name) in enumerate(tqdm(self.test_loader)):
                 images = torch.tensor(images, device=self.device, dtype=torch.float32)
 
