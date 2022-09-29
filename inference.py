@@ -39,6 +39,7 @@ class Inference():
                                       batch_size=args.batch_size, shuffle=False,
                                       num_workers=args.num_workers, transform=self.test_transform)
 
+
         if args.save_map is not None:
             os.makedirs(os.path.join('mask', self.args.dataset), exist_ok=True)
             os.makedirs(os.path.join('object', self.args.dataset), exist_ok=True)
@@ -48,6 +49,7 @@ class Inference():
         t = time.time()
 
         with torch.no_grad():
+            print('123')
             for i, (images, original_size, image_name) in enumerate(tqdm(self.test_loader)):
                 images = torch.tensor(images, device=self.device, dtype=torch.float32)
 

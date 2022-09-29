@@ -31,10 +31,10 @@ def find_mask(*args):
 
     
 
-    args.model_path = 'results/'
-    args.dataset = 'upload/'
-    args.arch = '7'
-    args.exp_num = 0
+    # args.model_path = 'results/'
+    # args.dataset = 'upload/'
+    # args.arch = '7'
+    # args.exp_num = 0
 
     save_path = os.path.join(args.model_path, args.dataset, f'TE{args.arch}_{str(args.exp_num)}')
 
@@ -43,5 +43,5 @@ def find_mask(*args):
 
 
 if __name__ == '__main__':
-    # find_mask()
-    pass
+    find_mask()
+    # pass

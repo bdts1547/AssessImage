@@ -46,4 +46,8 @@ url_TRACER = {
 def load_pretrained(model_name):
     state_dict = model_zoo.load_url(url_TRACER[model_name], map_location=torch.device('cpu'))
 
-    return state_dict
+    new_state_dict = {}
+    for k,v in state_dict.items():
+        new_k = k[7:]
+        new_state_dict[new_k] = v
+    return new_state_dict

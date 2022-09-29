@@ -17,7 +17,7 @@ from main_tracer import find_mask
 sys.path.append("..")
 sys.path.insert(0, "/data/upload")
 sys.path.insert(0, "/mask/upload")
-
+print(sys.path)
 
 
 

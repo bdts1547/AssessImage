@@ -4,8 +4,8 @@ def getConfig():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, default='inference', help='Model Training or Testing options')
     parser.add_argument('--exp_num', default=0, type=str, help='experiment_number')
-    parser.add_argument('--dataset', type=str, default='DUTS', help='DUTS')
-    parser.add_argument('--data_path', type=str, default='data/')
+    parser.add_argument('--dataset', type=str, default='upload/', help='DUTS')
+    parser.add_argument('--data_path', type=str, default='data\\')
 
     # Model parameter settings
     parser.add_argument('--arch', type=str, default='7', help='Backbone Architecture')
@@ -35,7 +35,7 @@ def getConfig():
 
     # Hardware settings
     parser.add_argument('--multi_gpu', type=bool, default=False)
-    parser.add_argument('--num_workers', type=int, default=4)
+    parser.add_argument('--num_workers', type=int, default=1)
 
 
     # parser = argparse.ArgumentParser()

@@ -55,13 +55,24 @@ class DatasetGenerate(Dataset):
 
 class Test_DatasetGenerate(Dataset):
     def __init__(self, img_folder, gt_folder=None, transform=None):
-        self.images = sorted(glob.glob(img_folder + '/*'))
-        self.gts = sorted(glob.glob(gt_folder + '/*')) if gt_folder is not None else None
+        self.images = sorted(glob.glob(img_folder + '\*'))
+        print(self.images)
+        self.gts = sorted(glob.glob(gt_folder + '\*')) if gt_folder is not None else None
         self.transform = transform
 
     def __getitem__(self, idx):
+        print(self.images[idx], idx)
+        
+        # breakpoint()
+        a = 'data\\upload\\1.png'
+
         image_name = Path(self.images[idx]).stem
         image = cv2.imread(self.images[idx])
+        image = cv2.imread(a)
+        print('a = ', a)
+        print("===", image)
+
+
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         original_size = image.shape[:2]
 
