@@ -85,3 +85,11 @@ Image samples: <input name="files" type="file" multiple><br>
     return HTMLResponse(content=content)
 
 
+@app.get("/")
+async def index():
+    content = """
+        Go /assess_image/upload -- to upload image
+    """
+
+    return HTMLResponse(content=content)
+
