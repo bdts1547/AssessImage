@@ -10,13 +10,14 @@ from inference import Inference
 from config import getConfig
 warnings.filterwarnings('ignore')
 
-args = getConfig()
+# args = getConfig()
 # pprint.pprint(args)
 
-def find_mask(*args):
+def find_mask():
     args = getConfig()
     print('<---- Training Params ---->')
-    # pprint.pprint(args)
+    pprint.pprint(args)
+    print(type(args))
 
     # Random Seed
     seed = args.seed

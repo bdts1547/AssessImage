@@ -266,7 +266,9 @@ def assess_image(filename, path_image, path_pred_map):
             'Backlit': percent_backlit,
             'Low contrast': percent_lcontrast,
             'Blur': percent_blur,
-            'Layout': layout
+            'Layout': layout,
+            'mask_path': path_pred_map,
+            'image_path': path_image,
            }
 
     return rst

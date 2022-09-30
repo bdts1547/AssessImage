@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI, UploadFile, File,  Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.staticfiles import StaticFiles
@@ -46,7 +46,7 @@ async def assess_image(files: List[UploadFile]):
     find_mask()
     shutil.rmtree('data/upload/') # remove folder data/upload/
 
-
+    # return 1
 
     # Assess Image
     result = []
@@ -93,3 +93,15 @@ async def index():
 
     return HTMLResponse(content=content)
 
+
+@app.get("/assess_image/mask/upload/{filename}")
+async def show_image(filename: str):
+    path = os.path.join('mask/upload', filename)
+
+    return FileResponse(path)
+
+@app.get("/assess_image/uploadImg/{filename}")
+async def show_image(filename: str):
+    path = os.path.join('uploadImg/', filename)
+
+    return FileResponse(path)
