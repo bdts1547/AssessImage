@@ -14,9 +14,9 @@ from main_tracer import find_mask
 import assess
 
 
-sys.path.append("..")
-sys.path.insert(0, "/data/upload")
-sys.path.insert(0, "/mask/upload")
+# sys.path.append("..")
+# sys.path.insert(0, "/data/upload/")
+# sys.path.insert(0, "/mask/upload/")
 
 
 
@@ -55,7 +55,6 @@ async def assess_image(files: List[UploadFile]):
         img_path = os.path.join('uploadImg/', fn)
         fn_mask = fn.split('.')[0] + '.png'
         mask_path = os.path.join('mask/upload/', fn_mask)
-
         rst = assess.assess_image(fn, img_path, mask_path)
         result.append(rst)
     
@@ -94,14 +93,9 @@ async def index():
     return HTMLResponse(content=content)
 
 
-@app.get("/assess_image/mask/upload/{filename}")
+@app.get("/assess_image/layout/upload/{filename}")
 async def show_image(filename: str):
-    path = os.path.join('mask/upload', filename)
+    path = os.path.join('layout/upload', filename)
 
     return FileResponse(path)
 
-@app.get("/assess_image/uploadImg/{filename}")
-async def show_image(filename: str):
-    path = os.path.join('uploadImg/', filename)
-
-    return FileResponse(path)

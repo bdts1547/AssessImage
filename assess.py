@@ -65,7 +65,30 @@ def backlit_detect(img, threshold=0.5):
         # print("candidate: {}, Thres: {:.2f}".format(is_candidate, s11/s9))
         return False, s11/s9
 
+def save_image(img, img_thresh, title, filename):
+    fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+    h, w, c = img.shape
 
+    ax[0].set_title("Saliency detect {}".format(filename))
+    ax[0].imshow(cv2.cvtColor(img_thresh, cv2.COLOR_BGR2RGB))
+
+    ax[1].set_title(title)
+    ax[1].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    x1 = [0, w-1]
+    y1 = [h//3-1, h//3-1]
+    y11 = [2*h//3-1, 2*h//3-1]
+    x2 = [w//3-1, w//3-1]
+    x22= [2*w//3-1, 2*w//3-1]
+    y2 = [0, h-1]
+
+    ax[1].plot(x1, y1, color='r', linestyle="-")
+    ax[1].plot(x1, y11, color='r', linestyle="-")
+    ax[1].plot(x2, y2, color='r', linestyle="-")
+    ax[1].plot(x22, y2, color='r', linestyle="-")
+
+    
+    fig.savefig('layout/upload/{}'.format(filename))
+    # plt.close()
 
 def get_bbox(thresh, img):
     # find conneted component, coordinate bbox
@@ -134,7 +157,6 @@ def detect_layout_center(img, centers, ratio=0.1):
     #     return ""
     return isCenter
 
-
 def detect_layout_onethird(img, centers, bboxes, ratio=1/6):
     (h, w, c) = img.shape
     gpoint1_img = (w * 1/3, h * 1/3)
@@ -163,22 +185,23 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/6):
     #     return ""
     return isOneThird
 
-
-def detect_layout(img_rgb, img_gray):
-            # img_rgb = cv2.imread(img_path)
-            # img_gray = cv2.imread(path_pred_map, 0)
-            _, thresh = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
-            img_bb, obj_centers, bboxes = get_bbox(thresh, img_rgb)
-            # title = layout(img_bb, obj_centers, bboxes)
-            # print(title)
-            if (detect_layout_center(img_bb, obj_centers)):
-                return "Center"
-            elif (detect_layout_onethird(img_bb, obj_centers, bboxes)):
-                return "OneThird"
-            else:
-                return "No Layout"
-
-
+def detect_layout(img_rgb, img_gray, filename):
+    # img_rgb = cv2.imread(img_path)
+    # img_gray = cv2.imread(path_pred_map, 0)
+    _, thresh = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
+    img_bb, obj_centers, bboxes = get_bbox(thresh, img_rgb)
+    # title = layout(img_bb, obj_centers, bboxes)
+    # print(title)
+    
+    if (detect_layout_center(img_bb, obj_centers)):
+        save_image(img_bb, thresh, "Center", filename)
+        return "Center"
+    elif (detect_layout_onethird(img_bb, obj_centers, bboxes)):
+        save_image(img_bb, thresh, "OneThird", filename)
+        return "OneThird"
+    else:
+        save_image(img_bb, thresh, "Not Layout", filename)
+        return "No Layout"
 
 def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percentile=99):
    
@@ -207,8 +230,6 @@ def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percent
     
     return percent
 
-
-
 def percent_blur_(img, threshold=1000):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     fm = cv2.Laplacian(gray, cv2.CV_64F).var()
@@ -220,10 +241,8 @@ def percent_blur_(img, threshold=1000):
 
     return percent
 
-
-
 def assess_image(filename, path_image, path_pred_map):
-    print('go assess')
+    print('Asssessing')
     img = cv2.imread(path_image)
     gray = cv2.imread(path_pred_map, 0)
 
@@ -237,7 +256,7 @@ def assess_image(filename, path_image, path_pred_map):
         percent_backlit = 0
 
     # Layout
-    layout = detect_layout(img, gray)
+    layout = detect_layout(img, gray, filename)
 
     # Contrast
     percent_lcontrast = percent_low_contrast(img)
@@ -261,14 +280,14 @@ def assess_image(filename, path_image, path_pred_map):
     # plt.axis('off')
     # plt.show()
     
+    mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,
             'Backlit': percent_backlit,
             'Low contrast': percent_lcontrast,
             'Blur': percent_blur,
             'Layout': layout,
-            'mask_path': path_pred_map,
-            'image_path': path_image,
+            'mask_path': mask_path,
            }
 
     return rst

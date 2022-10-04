@@ -32,11 +32,6 @@ def find_mask():
 
     
 
-    # args.model_path = 'results/'
-    # args.dataset = 'upload/'
-    # args.arch = '7'
-    # args.exp_num = 0
-
     save_path = os.path.join(args.model_path, args.dataset, f'TE{args.arch}_{str(args.exp_num)}')
     print('<----- Initializing inference mode ----->')
     Inference(args, save_path).test()

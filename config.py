@@ -41,7 +41,7 @@ def getConfig():
     parser = Namespace()
     parser.actiont='inference'
     parser.exp_num='0'
-    parser.dataset='DUTS'
+    parser.dataset='upload/'
     parser.data_path='data/'
 
     # Model parameter settings
