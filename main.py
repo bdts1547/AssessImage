@@ -84,18 +84,19 @@ Image samples: <input name="files" type="file" multiple><br>
     return HTMLResponse(content=content)
 
 
-@app.get("/")
-async def index():
-    content = """
-        Go /assess_image/upload -- to upload image
-    """
-
-    return HTMLResponse(content=content)
-
-
 @app.get("/assess_image/layout/upload/{filename}")
 async def show_image(filename: str):
     path = os.path.join('layout/upload', filename)
 
     return FileResponse(path)
 
+
+@app.get("/")
+async def index():
+    content = """
+        <body>
+            Click <a href="http://127.0.0.1:8000/assess_image/upload">Here</a> to upload image
+        </body>
+    """
+
+    return HTMLResponse(content=content)

@@ -95,7 +95,6 @@ def get_bbox(thresh, img):
     num_labels, labels, stats, centers = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
     bboxes = [] # Store x1, y1 , x2, y2 to plot cv.rectange
     h, w, c = img.shape
-
     for stat in stats[1:]:   # stats[0] is background
         x1, y1 = stat[0], stat[1]
         x2, y2 = (stat[0] + stat[2]) , (stat[1] + stat[3]) 
@@ -107,7 +106,8 @@ def get_bbox(thresh, img):
     x, y = w//2, h//2
     for bb, center in zip(bboxes, centers[1:]):
         x1, y1, x2, y2 = bb
-        xc, yc = (x1 + x2) // 2, (y1 + y2) // 2
+        # xc, yc = (x1 + x2) // 2, (y1 + y2) // 2
+        xc, yc = center
         img_bb = cv2.rectangle(img_bb, (x1, y1), (x2, y2), (255, 0, 0), 1)
         cv2.line(img_bb, (int(x), int(y)), (int(xc), int(yc)), (0,255,0), 1) # Plot center
         # cv.line(img_bb, (0, h//3), (w, h//3), (0,0,255), 1)
@@ -135,9 +135,9 @@ def is_point_in_rectangle(gpoints, bbox, img_bb):
 
     return False
 
-def detect_layout_center(img, centers, ratio=0.1):
+def detect_layout_center(img, centers, ratio=0.2):
     (h, w, c) = img.shape
-    threshold = max(w, h) * ratio
+    threshold = max(w, h) * ratio # Radius
     center_img = centers[0]
     isCenter = True
     if len(centers) <= 1:
