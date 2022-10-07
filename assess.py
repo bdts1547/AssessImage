@@ -8,6 +8,7 @@ from skimage import io, data, color
 
 # Layout
 from scipy.spatial import distance
+from mirror_symmetry import *
 
 # Contrast
 from imutils.paths import list_images
@@ -185,7 +186,7 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/6):
     #     return ""
     return isOneThird
 
-def detect_layout(img_rgb, img_gray, filename):
+def detect_layout(img_rgb, img_gray, filename, image_path):
     # img_rgb = cv2.imread(img_path)
     # img_gray = cv2.imread(path_pred_map, 0)
     _, thresh = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
@@ -193,6 +194,8 @@ def detect_layout(img_rgb, img_gray, filename):
     # title = layout(img_bb, obj_centers, bboxes)
     # print(title)
     
+    if (detecting_mirrorLine(image_path)):
+        return "Symmetry"
     if (detect_layout_center(img_bb, obj_centers)):
         save_image(img_bb, thresh, "Center", filename)
         return "Center"
@@ -256,7 +259,7 @@ def assess_image(filename, path_image, path_pred_map):
         percent_backlit = 0
 
     # Layout
-    layout = detect_layout(img, gray, filename)
+    layout = detect_layout(img, gray, filename, path_image)
 
     # Contrast
     percent_lcontrast = percent_low_contrast(img)
