@@ -39,20 +39,10 @@ def detecting_mirrorLine(picture_name: str, show_detail = False):
     r, theta = mirror.find_coordinate_maxhexbin(image_hexbin, sorted_vote, vertical=False)  
     
     # add mirror line based on r and theta
-    is_sym = mirror.is_symmetry(r, theta)
+    # is_sym = mirror.is_symmetry(r, theta)
 
-    return is_sym
+    return r, theta
 
-
-   
-
-
-
-def test_case(filesPath):
-    files = sorted([f for f in glob.glob(filesPath)])
-    for file in files:
-        detecting_mirrorLine(file, "With Mirror Line")
-        
 
 
 #############################

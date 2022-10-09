@@ -66,8 +66,8 @@ def backlit_detect(img, threshold=0.5):
         # print("candidate: {}, Thres: {:.2f}".format(is_candidate, s11/s9))
         return False, s11/s9
 
-def save_image(img, img_thresh, title, filename):
-    fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+def save_image(img, img_thresh, title, filename, point_1, point_2):
+    fig, ax = plt.subplots(1, 3, figsize=(16, 8))
     h, w, c = img.shape
 
     ax[0].set_title("Saliency detect {}".format(filename))
@@ -87,39 +87,54 @@ def save_image(img, img_thresh, title, filename):
     ax[1].plot(x2, y2, color='r', linestyle="-")
     ax[1].plot(x22, y2, color='r', linestyle="-")
 
+    img_sym = img.copy()
+    cv2.line(img_sym, point_1, point_2, (0,0,255), 3)
+    ax[2].imshow(img_sym)
+    
     
     fig.savefig('layout/upload/{}'.format(filename))
     # plt.close()
 
-def get_bbox(thresh, img):
-    # find conneted component, coordinate bbox
-    num_labels, labels, stats, centers = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
-    bboxes = [] # Store x1, y1 , x2, y2 to plot cv.rectange
-    h, w, c = img.shape
-    for stat in stats[1:]:   # stats[0] is background
-        x1, y1 = stat[0], stat[1]
-        x2, y2 = (stat[0] + stat[2]) , (stat[1] + stat[3]) 
-        
-        bboxes.append([int(x1), int(y1), int(x2), int(y2)])
+def get_bbox(img_bin, img_rgb, threshold=108):
+    """
+    Parameters:
+        img_bin: result of cv2.threshold
+        img_rgb: Image rgb
+        threshold: used to remove conneted components 
+
+    """
     
-    img_bb = img.copy()
-    center_img = tuple(centers[0].astype('uint8'))
+    h, w, c = img_rgb.shape
+    
+    # find conneted component, coordinate bbox
+    num_labels, labels, stats, centers = cv2.connectedComponentsWithStats(img_bin, 4, cv2.CV_32S)
+
+    thresh = h * w / threshold # Area divide threshold
+    bboxes = [] # Store x1, y1 , x2, y2 to plot cv.rectange
+    new_centers = []
+    for stat, center in zip(stats[1:], centers[1:]):   # stats[0] is background
+        if stat[4] > thresh:    # Remove object noise (obj small)
+            x1, y1 = stat[0], stat[1]
+            x2, y2 = (stat[0] + stat[2]) , (stat[1] + stat[3]) 
+            new_centers.append(center)
+            bboxes.append([int(x1), int(y1), int(x2), int(y2)])
+    
+    img_bb = img_rgb.copy()
     x, y = w//2, h//2
-    for bb, center in zip(bboxes, centers[1:]):
+    for bb, center in zip(bboxes, new_centers):
         x1, y1, x2, y2 = bb
-        # xc, yc = (x1 + x2) // 2, (y1 + y2) // 2
-        xc, yc = center
+        # xc, yc = (x1 + x2) // 2, (y1 + y2) // 2   # Use center bb
+        xc, yc = center                             # Use center object
         img_bb = cv2.rectangle(img_bb, (x1, y1), (x2, y2), (255, 0, 0), 1)
         cv2.line(img_bb, (int(x), int(y)), (int(xc), int(yc)), (0,255,0), 1) # Plot center
         # cv.line(img_bb, (0, h//3), (w, h//3), (0,0,255), 1)
         # cv.line(img_bb, (0, 2*h//3), (w, 2*h//3), (0,0,255), 1)
         # cv.line(img_bb, (w//3, 0), (w//3, h), (0,0,255), 1)
         # cv.line(img_bb, (2*w//3, 0), (2*w//3, h), (0,0,255), 1)
-        
-
-    # plt.imshow(cv.cvtColor(img_bb, cv.COLOR_BGR2RGB))
-    # plt.show()
-    return img_bb, centers, bboxes
+ 
+    
+    # print(f"Num obj: {len(new_centers)}")
+    return img_bb, new_centers, bboxes
 
 def is_point_in_rectangle(gpoints, bbox, img_bb):
     x1, y1, x2, y2 = bbox
@@ -136,75 +151,223 @@ def is_point_in_rectangle(gpoints, bbox, img_bb):
 
     return False
 
-def detect_layout_center(img, centers, ratio=0.2):
+def detect_layout_center(img, centers, ratio=1/6):
+    # ratio = 1/3, Acc = 0.7065
+    # ratio = 1/6, Acc = 0.8184
+    # ratio = 1/8, Acc = 0.7960
+    # ratio = 1/8, Acc = 0.7886
+
+
+
+
     (h, w, c) = img.shape
-    threshold = max(w, h) * ratio # Radius
-    center_img = centers[0]
-    isCenter = True
-    if len(centers) <= 1:
-        isCenter = False
-        # return ""
+    margin_width = w * ratio / 2 # Distance from image center to axis 1/3, 2/3
+    
+    p1 = np.asarray([w//2, 0])  # mid-top
+    p2 = np.asarray([w//2, h])  # mid-bottom
+    
+    if len(centers) == 0:
+        return False
+ 
+    is_center = True
+    for center in centers:
+        # Calc distance from point to mid-line
+        d = np.linalg.norm(np.cross(p2-p1, p1-center))/ np.linalg.norm(p2-p1)
+        # print(d)
+        if d > margin_width:
+            is_center = False
 
-    for center in centers[1:]:
-        d = distance.euclidean(center_img, center)
-        if (d > threshold):
-            isCenter = False
+    # for center in centers[1:]:
+    #     d = distance.euclidean(center_img, center)
+    #     if (d > threshold):
+    #         isCenter = False
         
-    # print('No. Object: ', len(centers) - 1)
-
-    # if (isCenter):
-    #     return ('Center')
-    # else:
-    #     return ""
-    return isCenter
+    
+    return is_center
 
 def detect_layout_onethird(img, centers, bboxes, ratio=1/6):
+    # ratio = 1/3, Acc = 0.4179
+    # ratio = 1/5, Acc = 0.8582
+    # ratio = 1/6, Acc = 0.8930
+    # ratio = 1/8, Acc = 0.8831
+    
     (h, w, c) = img.shape
-    gpoint1_img = (w * 1/3, h * 1/3)
-    gpoint2_img = (w * 2/3, h * 1/3) 
-    gpoint3_img = (w * 1/3, h * 2/3) 
-    gpoint4_img = (w * 2/3, h * 2/3) 
-    gpoint_img = [gpoint1_img, gpoint2_img, gpoint3_img, gpoint4_img]
-
-    margin_x = w * ratio
-    margin_y = h * ratio
-
-    isOneThird = True
-    if len(centers) <= 1:
-        isOneThird = False
-
-    for center, bbox in zip(centers[1:], bboxes):
-        # Check point in rectangle
-        if(not(is_point_in_rectangle(gpoint_img, bbox, img))):
-            isOneThird = False
     
-        # Check margin < threshold ?
+    g1 = np.asarray([w * 1/3, h * 1/3])    # left-top
+    g2 = np.asarray([w * 1/3, h * 2/3])    # left-bottom
     
-    # if (isOneThird):
-    #     return ('OneThird')
-    # else:
-    #     return ""
-    return isOneThird
+    g3 = np.asarray([w * 2/3, h * 1/3])    # right-top
+    g4 = np.asarray([w * 2/3, h * 2/3])    # right-bottom
+
+    margin_width = w * ratio / 2
+
+    if len(centers) == 0:
+        return False
+
+    is_onethird = True
+    for center in centers:
+        # Calc distance from point to line 1-3,2-3
+        d13 = np.linalg.norm(np.cross(g2-g1, g1-center)) / np.linalg.norm(g2-g1)
+        d23 = np.linalg.norm(np.cross(g4-g3, g3-center)) / np.linalg.norm(g4-g3)
+        d = min(d13, d23)
+
+        # print(d)
+        if d > margin_width:
+            is_onethird = False
+
+    return is_onethird
+
+def check_is_center_or_onethird(img, centers):
+    """
+        Return True is center, otherwise onethird
+    """
+
+    (h, w, c) = img.shape
+    
+    p1 = np.asarray([w//2, 0])  # mid-top
+    p2 = np.asarray([w//2, h])  # mid-bottom
+    
+    # gold-point
+    g1 = np.asarray([w * 1/3, h * 1/3])    # left-top
+    g2 = np.asarray([w * 1/3, h * 2/3])    # left-bottom
+    
+    g3 = np.asarray([w * 2/3, h * 1/3])    # right-top
+    g4 = np.asarray([w * 2/3, h * 2/3])    # right-bottom
+    
+    d_sum_center = 0
+    d_sum_onethird = 0
+    for center in centers:
+        # Calc distance from point to mid-line
+        d_to_center = np.linalg.norm(np.cross(p2-p1, p1-center)) / np.linalg.norm(p2-p1)
+        
+        # Calc distance from point to 1-3, 2-3
+        d13 = np.linalg.norm(np.cross(g2-g1, g1-center))/ np.linalg.norm(g2-g1)
+        d23 = np.linalg.norm(np.cross(g4-g3, g3-center))/ np.linalg.norm(g4-g3)
+        d_to_onethird = min(d13, d23)
+        
+        d_sum_center += d_to_center
+        d_sum_onethird += d_to_onethird
+
+    if d_sum_center <= d_sum_onethird:
+        return True
+    else:
+        return False
+
+def is_symmetry(image, r, theta): 
+
+    # Tính góc giữ trục đối xứng và trục Ox hoặc Oy
+    def cal_angle_with(point_1, point_2, axis=None): # y1, y2 ~ min height, max height
+        # a.b = |a||b|cos(a)
+        x1, y1 = point_1
+        x2, y2 = point_2
+
+        
+        if axis == 'Oy':  # vector relative to the vertical axis
+            vector_sym = [x2-x1, y2-y1]
+            vector_cmp = [0, y2]
+        
+        elif axis == 'Ox': # vector relative to the horizontal axis
+            vector_sym = [x2-x1, y2-y1]
+            vector_cmp = [x2, 0]
+        else:
+            print("Error: Must parameter 'axis' = Ox or Oy")
+            return
+
+        unit_vector_sym = vector_sym / np.linalg.norm(vector_sym)
+        unit_vector_cmp = vector_cmp / np.linalg.norm(vector_cmp)
+        dot_product = np.dot(unit_vector_sym, unit_vector_cmp)
+        angle = np.arccos(dot_product)
+        return np.degrees(angle)
+    
+    # x nằm trong đoạn x_min - xmax
+    def is_x_within(x, x_min, x_max):
+        if (x > x_min and x < x_max):
+            return True
+        return False
+    
+    def detect_symmetric(degree, point_1, point_2, thresh_y = 15, rate=0.2):
+        # symmetry through Oy
+        h, w, c = self.image.shape
+
+        x1, y1 = point_1
+        x2, y2 = point_2
+
+        x_center_min = int(w // 2 - (rate/2 * w))
+        x_center_max = int(w // 2 + (rate/2 * w))
+
+        is_within_center = is_x_within(x1, x_center_min, x_center_max) and is_x_within(x2, x_center_min, x_center_max)
+        if (degree < thresh_y) and is_within_center:
+            return True
+        else:
+            return False
+
+    
+    
+    h, w, c = image.shape
+
+    # Vertical
+    point_1 = (int((r-0*np.sin(theta))/np.cos(theta)), 0) # (x, y_min)
+    point_2 = (int((r-(h-1)*np.sin(theta))/np.cos(theta)), h-1) # (x, y_max)
+
+    # Horizontal
+    # point_1_Ox = (0, int(r / np.sin(theta))) # (x_min, y)
+    # point_2_Ox = (w-1, int((r-(w-1)*np.cos(theta)) / np.sin(theta))) # (x_max, y)
+
+
+    degree = cal_angle_with(point_1, point_2, axis='Oy')
+    # print(point_1, '|', point_2)
+    print("Degree:", degree)
+    _is_symmetry = detect_symmetric(degree, point_1, point_2)
+    
+
+
+    # draw plot 
+
+    return _is_symmetry, point_1, point_2
+
 
 def detect_layout(img_rgb, img_gray, filename, image_path):
-    # img_rgb = cv2.imread(img_path)
-    # img_gray = cv2.imread(path_pred_map, 0)
-    _, thresh = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
-    img_bb, obj_centers, bboxes = get_bbox(thresh, img_rgb)
-    # title = layout(img_bb, obj_centers, bboxes)
-    # print(title)
+    # print(filename)
+    _, img_bin = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
+    img_bb, obj_centers, bboxes = get_bbox(img_bin, img_rgb)
+    r, theta = detecting_mirrorLine(image_path)
     
-    if (detecting_mirrorLine(image_path)):
-        return "Symmetry"
-    if (detect_layout_center(img_bb, obj_centers)):
-        save_image(img_bb, thresh, "Center", filename)
-        return "Center"
-    elif (detect_layout_onethird(img_bb, obj_centers, bboxes)):
-        save_image(img_bb, thresh, "OneThird", filename)
-        return "OneThird"
-    else:
-        save_image(img_bb, thresh, "Not Layout", filename)
-        return "No Layout"
+
+    is_center = False
+    is_onethird = False
+    is_not_layout = False
+    
+    # _is_symmetry, point_1, point_2 = _is_symmetry(img_bb, r, theta)
+    # if (detecting_mirrorLine(image_path)):
+    #     save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
+    #     is_symmetry = True
+    #     return "Symmetry"
+    
+    if detect_layout_center(img_bb, obj_centers):
+        save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
+        is_center = True
+        # return "Center"
+    
+    if detect_layout_onethird(img_bb, obj_centers, bboxes):
+        save_image(img_bb, img_bin, "OneThird", filename, point_1, point_2)
+        is_onethird = True
+        # return "OneThird"
+    
+    # if is_center or is_onethird or is_symmetry:
+    #     is_not_layout = False
+    #     save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
+    #     return "No Layout"
+
+    if is_center and is_onethird:
+        is_center = check_is_center_or_onethird(img_bb, obj_centers) # Return True is center, otherwise onethird
+        is_onethird = not is_center
+
+    if is_onethird: return "OneThird"
+    if is_center: return "Center"
+
+    save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
+    return "No Layout"
+    
 
 def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percentile=99):
    

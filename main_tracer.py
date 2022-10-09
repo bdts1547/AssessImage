@@ -17,7 +17,6 @@ def find_mask():
     args = getConfig()
     print('<---- Training Params ---->')
     pprint.pprint(args)
-    print(type(args))
 
     # Random Seed
     seed = args.seed
