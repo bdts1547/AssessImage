@@ -67,7 +67,7 @@ def backlit_detect(img, threshold=0.5):
         return False, s11/s9
 
 def save_image(img, img_thresh, title, filename, point_1, point_2):
-    fig, ax = plt.subplots(1, 3, figsize=(16, 8))
+    fig, ax = plt.subplots(1, 3, figsize=(10, 8))
     h, w, c = img.shape
 
     ax[0].set_title("Saliency detect {}".format(filename))
@@ -89,7 +89,7 @@ def save_image(img, img_thresh, title, filename, point_1, point_2):
 
     img_sym = img.copy()
     cv2.line(img_sym, point_1, point_2, (0,0,255), 3)
-    ax[2].imshow(img_sym)
+    ax[2].imshow(cv2.cvtColor(img_sym, cv2.COLOR_BGR2RGB))
     
     
     fig.savefig('layout/upload/{}'.format(filename))
@@ -253,8 +253,10 @@ def check_is_center_or_onethird(img, centers):
     else:
         return False
 
-def is_symmetry(image, r, theta): 
+def is_symmetry(image, r, theta, thresh = 15, rate=1/3): 
+    # 15, 1/3 , acc = 0.338
 
+    thresh = thresh
     # Tính góc giữ trục đối xứng và trục Ox hoặc Oy
     def cal_angle_with(point_1, point_2, axis=None): # y1, y2 ~ min height, max height
         # a.b = |a||b|cos(a)
@@ -285,9 +287,13 @@ def is_symmetry(image, r, theta):
             return True
         return False
     
-    def detect_symmetric(degree, point_1, point_2, thresh_y = 15, rate=0.2):
+    def check_vertical():
         # symmetry through Oy
-        h, w, c = self.image.shape
+        point_1 = (int((r-0*np.sin(theta))/np.cos(theta)), 0) # (x, y_min)
+        point_2 = (int((r-(h-1)*np.sin(theta))/np.cos(theta)), h-1) # (x, y_max)
+        degree = cal_angle_with(point_1, point_2, axis='Oy')
+        # print(point_1, '|', point_2)
+        # print("Degree:", degree)
 
         x1, y1 = point_1
         x2, y2 = point_2
@@ -295,35 +301,56 @@ def is_symmetry(image, r, theta):
         x_center_min = int(w // 2 - (rate/2 * w))
         x_center_max = int(w // 2 + (rate/2 * w))
 
-        is_within_center = is_x_within(x1, x_center_min, x_center_max) and is_x_within(x2, x_center_min, x_center_max)
-        if (degree < thresh_y) and is_within_center:
-            return True
-        else:
-            return False
 
-    
-    
+        # Vertital
+        x_valid = is_x_within(x1, x_center_min, x_center_max) and is_x_within(x2, x_center_min, x_center_max)
+        if (degree < thresh) and x_valid:
+            return True, point_1, point_2
+
+        return False, point_1, point_2
+
+    def check_horizontal():
+    # symmetry through Ox
+        # Horizontal
+        point_1 = (0, int(r / np.sin(theta))) # (x_min, y)
+        point_2 = (w-1, int((r-(w-1)*np.cos(theta)) / np.sin(theta))) # (x_max, y)
+        
+        degree = cal_angle_with(point_1, point_2, axis='Ox')
+        # print(point_1, '|', point_2)
+        # print("Degree:", degree)
+
+        x1, y1 = point_1
+        x2, y2 = point_2
+
+        y_center_min = int(h // 2 - (rate/2 * h))
+        y_center_max = int(h // 2 + (rate/2 * h))
+
+
+        # Vertital
+        y_valid = is_x_within(y1, y_center_min, y_center_max) and is_x_within(y2, y_center_min, y_center_max)
+        
+        if degree < thresh and y_valid:
+            return True, point_1, point_2
+
+        return False, point_1, point_2
+
+
+
+
     h, w, c = image.shape
 
-    # Vertical
-    point_1 = (int((r-0*np.sin(theta))/np.cos(theta)), 0) # (x, y_min)
-    point_2 = (int((r-(h-1)*np.sin(theta))/np.cos(theta)), h-1) # (x, y_max)
 
-    # Horizontal
-    # point_1_Ox = (0, int(r / np.sin(theta))) # (x_min, y)
-    # point_2_Ox = (w-1, int((r-(w-1)*np.cos(theta)) / np.sin(theta))) # (x_max, y)
-
-
-    degree = cal_angle_with(point_1, point_2, axis='Oy')
-    # print(point_1, '|', point_2)
-    print("Degree:", degree)
-    _is_symmetry = detect_symmetric(degree, point_1, point_2)
+    _is_symmetry, p1, p2 = check_vertical()
+    if _is_symmetry:
+        return _is_symmetry, p1, p2
+    else:
+        return check_horizontal()
     
 
 
     # draw plot 
 
-    return _is_symmetry, point_1, point_2
+    # return _is_symmetry, p1, p2
 
 
 def detect_layout(img_rgb, img_gray, filename, image_path):
@@ -337,12 +364,13 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
     is_onethird = False
     is_not_layout = False
     
-    # _is_symmetry, point_1, point_2 = _is_symmetry(img_bb, r, theta)
-    # if (detecting_mirrorLine(image_path)):
-    #     save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
-    #     is_symmetry = True
-    #     return "Symmetry"
-    
+    _is_symmetry, point_1, point_2 = is_symmetry(img_bb, r, theta)
+    save_image(img_bb, img_bin, "test", filename, point_1, point_2)
+
+    if (_is_symmetry):
+        # save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
+        return "Symmetry"
+
     if detect_layout_center(img_bb, obj_centers):
         save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
         is_center = True
@@ -362,8 +390,12 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
         is_center = check_is_center_or_onethird(img_bb, obj_centers) # Return True is center, otherwise onethird
         is_onethird = not is_center
 
-    if is_onethird: return "OneThird"
-    if is_center: return "Center"
+    if _is_symmetry:
+        if is_onethird: return "OneThird, Symmetry"
+        if is_center: return "Center, Symmetry"
+    else:
+        if is_onethird: return "OneThird"
+        if is_center: return "Center"
 
     save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
     return "No Layout"

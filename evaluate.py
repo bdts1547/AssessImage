@@ -39,42 +39,70 @@ def plot_dataset(path_folders):
     plt.show()
 
 # Evaluate layout
-def evaluate_layout(path_folders_images, layout=None):
+def evaluate_each_layout(path_folders_images, layout=None):
     # layout: center| symmetry | onethird
     print("Evaluating...")
 
-    # Create data
     list_folders = os.listdir(path_folders_images)
 
     x, y, pred, imgs_name = [], [], [], []
-    for folder in list_folders:
-        if folder == layout:
-            list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-            list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
-            list_images.sort()
-            list_maps.sort()
-            for filename in list_images:
-                if filename.split('.')[1] == 'png':
-                    img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
-                    img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
 
-                    x.append([img, img_gray])
-                    y.append(1)
-                    imgs_name.append(filename)
-        else:
-            list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-            list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
-            list_images.sort()
-            list_maps.sort()
+    # Process symmetry
+    if layout == 'symmetry':
+        for folder in list_folders:
+            if folder == layout:
+                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+                list_images.sort()
+                for filename in list_images:
+                    if filename.split('.')[1] == 'png':
+                        image_path = os.path.join(path_folders_images, folder, 'img',filename)
+                        img = cv2.imread(image_path)
+                        r, theta = detecting_mirrorLine(image_path)
+                        x.append([r, theta, img])
+                        y.append(1)
+                        imgs_name.append(filename)
+            else:
+                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+                list_images.sort()
+                for filename in list_images:
+                    if filename.split('.')[1] == 'png':
+                        image_path = os.path.join(path_folders_images, folder, 'img',filename)
+                        img = cv2.imread(image_path)
+                        r, theta = detecting_mirrorLine(image_path)
+                        x.append([r, theta, img])
+                        y.append(0)
+                        imgs_name.append(filename)
 
-            for filename in list_images:
-                if filename.split('.')[1] == 'png':
-                    img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
-                    img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
+           
+    else:
+        for folder in list_folders:
+            if folder == layout:
+                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+                list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
+                list_images.sort()
+                list_maps.sort()
+                for filename in list_images:
+                    if filename.split('.')[1] == 'png':
+                        img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
+                        img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
 
-                    x.append([img, img_gray])
-                    y.append(0)
-                    imgs_name.append(filename)
+                        x.append([img, img_gray])
+                        y.append(1)
+                        imgs_name.append(filename)
+            else:
+                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+                list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
+                list_images.sort()
+                list_maps.sort()
+
+                for filename in list_images:
+                    if filename.split('.')[1] == 'png':
+                        img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
+                        img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
+
+                        x.append([img, img_gray])
+                        y.append(0)
+                        imgs_name.append(filename)
 
     # prediction
     if layout == 'center':
@@ -91,12 +119,10 @@ def evaluate_layout(path_folders_images, layout=None):
             tmp = detect_layout_onethird(img_bb, obj_centers, bboxes)
             pred.append(tmp)
 
-    # elif layout == 'symmetry':
-    #     for img_rgb, img_gray in x:
-    #         _, img_bin = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
-    #         img_bb, obj_centers, bboxes = get_bbox(img_bin, img_rgb)
-    #         tmp = detecting_mirrorLine(img_bb, obj_centers)
-    #         pred.append(tmp)
+    elif layout == 'symmetry':
+        for r, theta, img in x:
+            tmp,_,_ = is_symmetry(img, r, theta)
+            pred.append(tmp)
     
     else:
         print("Error: Parameter layout is center or onethird or symmetry")
@@ -121,5 +147,5 @@ def evaluate_layout(path_folders_images, layout=None):
 
 if __name__ == "__main__":
     # plot_dataset("img_evaluate/Eval_Layout")
-    evaluate_layout("img_evaluate/Eval_Layout", 'center')
+    evaluate_each_layout("img_evaluate/Eval_Layout", 'symmetry')
     print("Done!")

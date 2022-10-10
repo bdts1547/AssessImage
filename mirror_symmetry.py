@@ -55,7 +55,6 @@ class Mirror_Symmetry_detection:
         self.image = self._read_color_image(image_path) # convert the image into the array/matrix
 
         self.filename = image_path.split('/')[-1]
-        print(self.filename)
 
         self.reflected_image = np.fliplr(self.image) # Flipped version of image 
         
