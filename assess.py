@@ -151,14 +151,14 @@ def is_point_in_rectangle(gpoints, bbox, img_bb):
 
     return False
 
-def detect_layout_center(img, centers, ratio=1/6):
+def detect_layout_center(img, centers, ratio=1/3):
+    
+    
     # ratio = 1/3, Acc = 0.7065
     # ratio = 1/6, Acc = 0.8184
     # ratio = 1/8, Acc = 0.7960
     # ratio = 1/8, Acc = 0.7886
-
-
-
+    
 
     (h, w, c) = img.shape
     margin_width = w * ratio / 2 # Distance from image center to axis 1/3, 2/3
@@ -185,7 +185,7 @@ def detect_layout_center(img, centers, ratio=1/6):
     
     return is_center
 
-def detect_layout_onethird(img, centers, bboxes, ratio=1/6):
+def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
     # ratio = 1/3, Acc = 0.4179
     # ratio = 1/5, Acc = 0.8582
     # ratio = 1/6, Acc = 0.8930
@@ -364,18 +364,22 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
     is_onethird = False
     is_not_layout = False
     
+    # Detect symmetry
     _is_symmetry, point_1, point_2 = is_symmetry(img_bb, r, theta)
-    save_image(img_bb, img_bin, "test", filename, point_1, point_2)
+    # save_image(img_bb, img_bin, "test", filename, point_1, point_2)
 
-    if (_is_symmetry):
+    # if (_is_symmetry):
         # save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
-        return "Symmetry"
+        # return "Symmetry"
 
+
+    # Detect center
     if detect_layout_center(img_bb, obj_centers):
         save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
         is_center = True
         # return "Center"
     
+    # Detect one-third
     if detect_layout_onethird(img_bb, obj_centers, bboxes):
         save_image(img_bb, img_bin, "OneThird", filename, point_1, point_2)
         is_onethird = True
@@ -386,19 +390,32 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
     #     save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
     #     return "No Layout"
 
+    # Compare distince center/onethird
     if is_center and is_onethird:
         is_center = check_is_center_or_onethird(img_bb, obj_centers) # Return True is center, otherwise onethird
         is_onethird = not is_center
 
     if _is_symmetry:
-        if is_onethird: return "OneThird, Symmetry"
-        if is_center: return "Center, Symmetry"
-    else:
-        if is_onethird: return "OneThird"
-        if is_center: return "Center"
+        if is_onethird: 
+            save_image(img_bb, img_bin, "OneThird, Symmetry", filename, point_1, point_2)
+            return "OneThird, Symmetry"
+        elif is_center: 
+            save_image(img_bb, img_bin, "Center, Symmetry", filename, point_1, point_2)
+            return "Center, Symmetry"
+        else:
+            save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
+            return "Symmetry"
 
-    save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
-    return "No Layout"
+    else:
+        if is_onethird: 
+            save_image(img_bb, img_bin, "OneThird", filename, point_1, point_2)
+            return "OneThird"
+        elif is_center: 
+            save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
+            return "Center"
+        else:
+            save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
+            return "No Layout"
     
 
 def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percentile=99):
