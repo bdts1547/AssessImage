@@ -153,6 +153,8 @@ def evaluate_each_layout(path_folders_images, layout=None):
     # print("Threshold: {:.4f}, Acc: {:.4f}".format(threshold, acc))
     print("Images fail:", imgs_name[id_false])
     print("Accuracy: {:.4f}".format(acc))
+
+
     return acc
 
 def detect_blur_1(img, threshold=500):
@@ -221,7 +223,30 @@ def evaluate_blur(path_positive, path_negative, threshold, is_plot=False):
         acc = rst.sum() / n
         imgs_name = np.array(imgs_name)
         print("Threshold: {}, Acc: {:.3f}".format(threshold, acc))
-        # print(imgs_name[id_false])
+        
+        
+        # View image
+        name_true = imgs_name[id_true]
+        name_false = imgs_name[id_false]
+        tmp = np.array(x)
+        imgs_true = tmp[id_true]
+        imgs_false = tmp[id_false]
+        
+        # print('view true')
+        # for name, img in zip(name_true, imgs_true):
+        #     plt.figure()
+        #     plt.imshow(img)
+        #     plt.title(name)
+        #     plt.show()
+
+        print('view false')
+        for name, img in zip(name_false, imgs_false):
+            plt.figure()
+            plt.imshow(img[:,:,:,-1])
+            plt.title(name)
+            plt.show()
+
+
         return acc
 
 def evaluate_backlit(path_backlit_imgs, path_normal_imgs, threshold=0.5, is_plot=False):
@@ -320,7 +345,7 @@ def evaluate_contrast(path_backlit_imgs, path_normal_imgs, threshold=0.8, is_plo
 
     if is_plot:
         accs = []
-        threshold = np.arange(0, 1, 0.1)
+        threshold = np.arange(0, 1.1, 0.1)
         
         for t in threshold:
             pred = []
@@ -333,7 +358,7 @@ def evaluate_contrast(path_backlit_imgs, path_normal_imgs, threshold=0.8, is_plo
             acc = rst.sum() / len(x)
             imgs_name = np.array(imgs_name)
             print("Threshold: {}, Acc: {:.3f}".format(t, acc))
-            # print(imgs_name[id_false])
+            print(imgs_name[id_true])
             accs.append(acc)
         
         plt.plot(threshold, accs)
@@ -354,6 +379,48 @@ def evaluate_contrast(path_backlit_imgs, path_normal_imgs, threshold=0.8, is_plo
         imgs_name = np.array(imgs_name)
         print("Threshold: {:.4f}, Acc: {:.4f}".format(threshold, acc))
         print(imgs_name[id_false])
+
+        # View image
+        name_true = imgs_name[id_true]
+        name_false = imgs_name[id_false]
+        tmp = np.array(x)
+        imgs_true = tmp[id_true]
+        imgs_false = tmp[id_false]
+        
+        # print('view true')
+        # for name, img in zip(name_true, imgs_true):
+        #     fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+
+        #     ax[0].set_title(name)
+        #     ax[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+        #     histr = cv2.calcHist([img],[0],None,[256],[0,256])
+        #     # ax[1].hist(img.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
+        #     # ax[1].plot(histr)
+        #     ax[1].hist(img.ravel(),256,[0,256])
+            
+        #     # plt.figure()
+        #     # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        #     # plt.title(name)
+        #     plt.show()
+
+        print('view false')
+        for name, img in zip(name_false, imgs_false):
+            fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+
+            ax[0].set_title(name)
+            ax[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+            histr = cv2.calcHist([img],[0],None,[256],[0,256])
+            # ax[1].hist(img.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
+            # ax[1].plot(histr)
+            ax[1].hist(img.ravel(),256,[0,256])
+            
+            # plt.figure()
+            # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            # plt.title(name)
+            plt.show()
+
         return acc
 
 
@@ -373,13 +440,13 @@ def detect_low_contrast(img, threshold=0.8):
 
 if __name__ == "__main__":
     # plot_dataset("img_evaluate/Dataset/Dataset_Blur", " ", "Dataset_Blur")
-    # evaluate_each_layout("img_evaluate/Eval_Layout", 'symmetry')
+    # evaluate_each_layout("img_evaluate/Dataset_Layout", 'symmetry')
     # evaluate_backlit("img_evaluate/Dataset/Dataset_Backlit/Backlit", 
     #     "img_evaluate/Dataset/Dataset_Backlit/Normal_light", 0.5, True)
-    # evaluate_contrast("img_evaluate/Dataset/Dataset_Contrast/low_contrast",
-        # "img_evaluate/Dataset/Dataset_Contrast/normal", 0.8, True)
-    evaluate_blur( "img_evaluate/Dataset/Dataset_Blur/Blur/", 
-    "img_evaluate/Dataset/Dataset_Blur/NotBlur/", 5000, True)
+    evaluate_contrast("img_evaluate/Dataset/Dataset_Contrast_New/low",
+        "img_evaluate/Dataset/Dataset_Contrast_New/high", 0.65, False)
+    # evaluate_blur( "img_evaluate/Dataset/Dataset_Blur/Blur/", 
+    # "img_evaluate/Dataset/Dataset_Blur/NotBlur/", 5000, False)
     print("Done!")
 
 
@@ -423,6 +490,7 @@ if __name__ == "__main__":
     #     rst.append(evaluate( "img_evaluate/Dataset/Dataset_Blur/Blur/", "img_evaluate/Dataset/Dataset_Blur/NotBlur/", t))
 
     # plt.plot(threshold, rst)
+    # plt.imshow(im_output)
     # plt.xlabel('Threshold')
     # plt.ylabel('Acc')
     # plt.show()

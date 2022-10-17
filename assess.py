@@ -357,7 +357,6 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
     # print(filename)
     _, img_bin = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
     img_bb, obj_centers, bboxes = get_bbox(img_bin, img_rgb)
-    r, theta = detecting_mirrorLine(image_path)
     
 
     is_center = False
@@ -365,8 +364,15 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
     is_not_layout = False
     
     # Detect symmetry
-    _is_symmetry, point_1, point_2 = is_symmetry(img_bb, r, theta)
+    try:
+        r, theta = detecting_mirrorLine(image_path)
+        _is_symmetry, point_1, point_2 = is_symmetry(img_bb, r, theta)
     # save_image(img_bb, img_bin, "test", filename, point_1, point_2)
+    except:
+        print("Error when detect symmetry")
+        _is_symmetry = False
+        point_1 = (0, 0)
+        point_2 = (0, 0)
 
     # if (_is_symmetry):
         # save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
@@ -418,7 +424,7 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
             return "No Layout"
     
 
-def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percentile=99):
+def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percentile=99):
    
     from skimage.util.dtype import dtype_range, dtype_limits
     from skimage.color import rgb2gray, rgba2rgb
@@ -441,7 +447,8 @@ def percent_low_contrast(image, threshold=0.8, lower_percentile=1, upper_percent
         ratio = ratio
         if ratio < 0: ratio = 0
 
-    percent = 100 - (ratio / _max * 100)
+    # percent = 100 - (ratio / _max * 100)
+    percent = (ratio / _max * 100)
     
     return percent
 
@@ -499,7 +506,7 @@ def assess_image(filename, path_image, path_pred_map):
     rst = { 
             'File name': filename,
             'Backlit': percent_backlit,
-            'Low contrast': percent_lcontrast,
+            'Contrast': percent_lcontrast,
             'Blur': percent_blur,
             'Layout': layout,
             'mask_path': mask_path,
