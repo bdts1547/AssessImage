@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import cv2
+import time
 from skimage import io, data, color
 
 # Layout
 from scipy.spatial import distance
-from mirror_symmetry import *
 
 # Contrast
 from imutils.paths import list_images
@@ -67,8 +67,9 @@ def backlit_detect(img, threshold=0.5):
         # print("candidate: {}, Thres: {:.2f}".format(is_candidate, s11/s9))
         return False, s11/s9
 
-def save_image(img, img_thresh, title, filename, point_1, point_2):
-    fig, ax = plt.subplots(1, 3, figsize=(10, 8))
+
+def save_image(img, img_thresh, title, filename):
+    fig, ax = plt.subplots(1, 2, figsize=(10, 8))
     h, w, c = img.shape
 
     ax[0].set_title("Saliency detect {}".format(filename))
@@ -88,13 +89,11 @@ def save_image(img, img_thresh, title, filename, point_1, point_2):
     ax[1].plot(x2, y2, color='r', linestyle="-")
     ax[1].plot(x22, y2, color='r', linestyle="-")
 
-    img_sym = img.copy()
-    cv2.line(img_sym, point_1, point_2, (0,0,255), 3)
-    ax[2].imshow(cv2.cvtColor(img_sym, cv2.COLOR_BGR2RGB))
     
     
     fig.savefig('layout/upload/{}'.format(filename))
     # plt.close()
+
 
 def get_bbox(img_bin, img_rgb, threshold=108):
     """
@@ -137,6 +136,7 @@ def get_bbox(img_bin, img_rgb, threshold=108):
     # print(f"Num obj: {len(new_centers)}")
     return img_bb, new_centers, bboxes
 
+
 def is_point_in_rectangle(gpoints, bbox, img_bb):
     x1, y1, x2, y2 = bbox
     # gp1 = gpoints[0]
@@ -151,6 +151,7 @@ def is_point_in_rectangle(gpoints, bbox, img_bb):
             return True
 
     return False
+
 
 def detect_layout_center(img, centers, ratio=1/3):
     
@@ -186,6 +187,7 @@ def detect_layout_center(img, centers, ratio=1/3):
     
     return is_center
 
+
 def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
     # ratio = 1/3, Acc = 0.4179
     # ratio = 1/5, Acc = 0.8582
@@ -217,6 +219,7 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
             is_onethird = False
 
     return is_onethird
+
 
 def check_is_center_or_onethird(img, centers):
     """
@@ -254,107 +257,8 @@ def check_is_center_or_onethird(img, centers):
     else:
         return False
 
-def is_symmetry(image, r, theta, thresh = 15, rate=1/3): 
-    # 15, 1/3 , acc = 0.338
 
-    thresh = thresh
-    # Tính góc giữ trục đối xứng và trục Ox hoặc Oy
-    def cal_angle_with(point_1, point_2, axis=None): # y1, y2 ~ min height, max height
-        # a.b = |a||b|cos(a)
-        x1, y1 = point_1
-        x2, y2 = point_2
-
-        
-        if axis == 'Oy':  # vector relative to the vertical axis
-            vector_sym = [x2-x1, y2-y1]
-            vector_cmp = [0, y2]
-        
-        elif axis == 'Ox': # vector relative to the horizontal axis
-            vector_sym = [x2-x1, y2-y1]
-            vector_cmp = [x2, 0]
-        else:
-            print("Error: Must parameter 'axis' = Ox or Oy")
-            return
-
-        unit_vector_sym = vector_sym / np.linalg.norm(vector_sym)
-        unit_vector_cmp = vector_cmp / np.linalg.norm(vector_cmp)
-        dot_product = np.dot(unit_vector_sym, unit_vector_cmp)
-        angle = np.arccos(dot_product)
-        return np.degrees(angle)
-    
-    # x nằm trong đoạn x_min - xmax
-    def is_x_within(x, x_min, x_max):
-        if (x > x_min and x < x_max):
-            return True
-        return False
-    
-    def check_vertical():
-        # symmetry through Oy
-        point_1 = (int((r-0*np.sin(theta))/np.cos(theta)), 0) # (x, y_min)
-        point_2 = (int((r-(h-1)*np.sin(theta))/np.cos(theta)), h-1) # (x, y_max)
-        degree = cal_angle_with(point_1, point_2, axis='Oy')
-        # print(point_1, '|', point_2)
-        # print("Degree:", degree)
-
-        x1, y1 = point_1
-        x2, y2 = point_2
-
-        x_center_min = int(w // 2 - (rate/2 * w))
-        x_center_max = int(w // 2 + (rate/2 * w))
-
-
-        # Vertital
-        x_valid = is_x_within(x1, x_center_min, x_center_max) and is_x_within(x2, x_center_min, x_center_max)
-        if (degree < thresh) and x_valid:
-            return True, point_1, point_2
-
-        return False, point_1, point_2
-
-    def check_horizontal():
-    # symmetry through Ox
-        # Horizontal
-        point_1 = (0, int(r / np.sin(theta))) # (x_min, y)
-        point_2 = (w-1, int((r-(w-1)*np.cos(theta)) / np.sin(theta))) # (x_max, y)
-        
-        degree = cal_angle_with(point_1, point_2, axis='Ox')
-        # print(point_1, '|', point_2)
-        # print("Degree:", degree)
-
-        x1, y1 = point_1
-        x2, y2 = point_2
-
-        y_center_min = int(h // 2 - (rate/2 * h))
-        y_center_max = int(h // 2 + (rate/2 * h))
-
-
-        # Vertital
-        y_valid = is_x_within(y1, y_center_min, y_center_max) and is_x_within(y2, y_center_min, y_center_max)
-        
-        if degree < thresh and y_valid:
-            return True, point_1, point_2
-
-        return False, point_1, point_2
-
-
-
-
-    h, w, c = image.shape
-
-
-    _is_symmetry, p1, p2 = check_vertical()
-    if _is_symmetry:
-        return _is_symmetry, p1, p2
-    else:
-        return check_horizontal()
-    
-
-
-    # draw plot 
-
-    # return _is_symmetry, p1, p2
-
-
-def detect_layout(img_rgb, img_gray, filename, image_path):
+def detect_layout(img_rgb, img_gray, filename, score_sym, threshold_sym=0.6):
     # print(filename)
     _, img_bin = cv2.threshold(img_gray, 100,255,cv2.THRESH_BINARY)
     img_bb, obj_centers, bboxes = get_bbox(img_bin, img_rgb)
@@ -362,66 +266,43 @@ def detect_layout(img_rgb, img_gray, filename, image_path):
 
     is_center = False
     is_onethird = False
-    is_not_layout = False
+    is_symmetry = max(score_sym) > threshold_sym
     
-    # Detect symmetry
-    try:
-        r, theta = detecting_mirrorLine(image_path)
-        _is_symmetry, point_1, point_2 = is_symmetry(img_bb, r, theta)
-    # save_image(img_bb, img_bin, "test", filename, point_1, point_2)
-    except:
-        print("Error when detect symmetry")
-        _is_symmetry = False
-        point_1 = (0, 0)
-        point_2 = (0, 0)
-
-    # if (_is_symmetry):
-        # save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
-        # return "Symmetry"
-
-
+    
     # Detect center
     if detect_layout_center(img_bb, obj_centers):
-        save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
         is_center = True
-        # return "Center"
     
     # Detect one-third
     if detect_layout_onethird(img_bb, obj_centers, bboxes):
-        save_image(img_bb, img_bin, "OneThird", filename, point_1, point_2)
         is_onethird = True
-        # return "OneThird"
     
-    # if is_center or is_onethird or is_symmetry:
-    #     is_not_layout = False
-    #     save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
-    #     return "No Layout"
 
     # Compare distince center/onethird
     if is_center and is_onethird:
         is_center = check_is_center_or_onethird(img_bb, obj_centers) # Return True is center, otherwise onethird
         is_onethird = not is_center
 
-    if _is_symmetry:
+    if is_symmetry:
         if is_onethird: 
-            save_image(img_bb, img_bin, "OneThird, Symmetry", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "OneThird, Symmetry", filename)
             return "OneThird, Symmetry"
         elif is_center: 
-            save_image(img_bb, img_bin, "Center, Symmetry", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "Center, Symmetry", filename)
             return "Center, Symmetry"
         else:
-            save_image(img_bb, img_bin, "Symmetry", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "Symmetry", filename)
             return "Symmetry"
 
     else:
         if is_onethird: 
-            save_image(img_bb, img_bin, "OneThird", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "OneThird", filename)
             return "OneThird"
         elif is_center: 
-            save_image(img_bb, img_bin, "Center", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "Center", filename)
             return "Center"
         else:
-            save_image(img_bb, img_bin, "Not Layout", filename, point_1, point_2)
+            save_image(img_bb, img_bin, "Not Layout", filename)
             return "No Layout"
     
 
@@ -453,6 +334,7 @@ def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percen
     
     return percent
 
+
 def percent_blur_(img, threshold=1000):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     fm = cv2.Laplacian(gray, cv2.CV_64F).var()
@@ -464,12 +346,15 @@ def percent_blur_(img, threshold=1000):
 
     return percent
 
-def assess_image(filename, path_image, path_pred_map):
+
+def assess_image(filename, path_image, path_pred_map, score_sym):
     print('Asssessing')
     img = cv2.imread(path_image)
     gray = cv2.imread(path_pred_map, 0)
 
+    
     # Backlit
+    # start = time.time()
     is_backlit, thres_bl = backlit_detect(img, 0.8)
     if is_backlit:
         if thres_bl < 0.15: thres_bl = 0.15    # Min các của giá trị s11/s9
@@ -477,32 +362,28 @@ def assess_image(filename, path_image, path_pred_map):
         percent_backlit = 100 - ((thres_bl - 0.15) / (0.8 - 0.15) * 100)
     else:
         percent_backlit = 0
-
+    # end = time.time()
+    # print("Time running Backlit: {:.2f}".format(end-start))
+    
+    
     # Layout
-    layout = detect_layout(img, gray, filename, path_image)
-
+    # start = time.time()
+    layout = detect_layout(img, gray, filename, score_sym)
+    # end = time.time()
+    # print("Time running Layout: {:.2f}".format(end-start))
+    
     # Contrast
+    # start = time.time()
     percent_lcontrast = percent_low_contrast(img)
+    # end = time.time()
+    # print("Time running Contrast: {:.2f}".format(end-start))
 
     # Sharpness
+    # start = time.time()
     percent_blur = percent_blur_(img)
-    
-    # Write assess
-    # color = (255, 0, 0)
-    # cv2.putText(img, "Backlit: {:.0f}%".format(percent_backlit), (10, 30),
-    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    # cv2.putText(img, "Layout: {}".format(layout), (10, 55),
-    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    # cv2.putText(img, "Low contrast: {:.0f}%".format(percent_lcontrast), (10, 80),
-    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    # cv2.putText(img, "Blur: {:.0f}%".format(percent_blur), (10, 105),
-    #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    
-    # plt.figure(figsize=(10, 8))
-    # plt.imshow(img[:,:,::-1])
-    # plt.axis('off')
-    # plt.show()
-    
+    # end = time.time()
+    # print("Time running Sharpness: {:.2f}".format(end-start))
+  
     mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,
@@ -511,6 +392,8 @@ def assess_image(filename, path_image, path_pred_map):
             'Blur': percent_blur,
             'Layout': layout,
             'mask_path': mask_path,
+            'max_score_symmetry': max(score_sym),
            }
 
     return rst
+

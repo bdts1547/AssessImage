@@ -9,6 +9,7 @@ from typing import List
 import shutil
 import sys
 import os
+import time
 
 from main_tracer import find_mask
 import assess
@@ -27,12 +28,15 @@ async def assess_image(files: List[UploadFile]):
     if not os.path.exists('uploadImg/'):
         os.makedirs('uploadImg/')
 
-    if not os.path.exists('data/upload/'):
+    if os.path.exists('data/upload/'):
+        # Clear folder
+        shutil.rmtree('data/upload/')
+        os.makedirs('data/upload/')
+    else:
         os.makedirs('data/upload/')
 
     # Save image to UploadImg
     for image in files:
-        print(image.file)
         with open("uploadImg/" + str(image.filename), "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
@@ -44,19 +48,40 @@ async def assess_image(files: List[UploadFile]):
     
     
     # Find SOD
+    start = time.time()
     find_mask()
+    end = time.time()
+    print("Time running SOD: {:.2f}".format(end-start))
+
+    # Find score symmetry
+    start = time.time()
+    os.system("conda activate py27 & python symmary.py")
+    end = time.time()
+    print("Time running Score-symmetry: {:.2f}".format(end-start))
+
+    scores_sym = {}
+    with open('score_symmetry.csv', 'r') as f:
+        lines = f.read().splitlines()
+        
+    for line in lines:
+        d = list(map(str, line.split(',')))
+        scores_sym[d[0]] = list(map(float, d[1:]))
+    # print(scores_sym)
+
+
     shutil.rmtree('data/upload/') # remove folder data/upload/
 
-    # return 1
+
 
     # Assess Image
     result = []
     for img in files:
         fn = img.filename
+        score_sym = scores_sym[fn]
         img_path = os.path.join('uploadImg/', fn)
         fn_mask = fn.split('.')[0] + '.png'
         mask_path = os.path.join('mask/upload/', fn_mask)
-        rst = assess.assess_image(fn, img_path, mask_path)
+        rst = assess.assess_image(fn, img_path, mask_path, score_sym)
         result.append(rst)
     
     

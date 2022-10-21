@@ -57,4 +57,17 @@ def create_imgs_blur_sharp(path_folder):
         break
 
 if __name__ == "__main__":
-    create_imgs_blur_sharp('img_valuate/Dataset/Dataset_Blur/NotBlur/')
+    # create_imgs_blur_sharp('img_valuate/Dataset/Dataset_Blur/NotBlur/')
+    # os.system("conda activate py27 & python symmary.py")
+    # print('Done')
+
+    scores_sym = {}
+    with open('score_symmetry.csv', 'r') as f:
+        lines = f.read().splitlines()
+        
+    for line in lines:
+        d = list(map(str, line.split(',')))
+        scores_sym[d[0]] = list(map(float, d[1:]))
+        print(d[0], max(scores_sym[d[0]]) > 0.6)
+    print(scores_sym)
+    
