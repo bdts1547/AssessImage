@@ -9,7 +9,7 @@ def getConfig():
     parser.data_path='data/'
 
     # Model parameter settings
-    parser.arch='7'
+    parser.arch='5'
     parser.channels = [24, 40, 112, 320]
     parser.RFB_aggregated_channel=[32, 64, 128]
     parser.frequency_radius = 16
@@ -17,7 +17,7 @@ def getConfig():
     parser.gamma = 0.1
 
     # Training parameter settings
-    parser.img_size = 640
+    parser.img_size = 512
     parser.batch_size = 32
     parser.epochs = 100
     parser.lr = 5e-5

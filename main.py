@@ -32,6 +32,7 @@ async def assess_image(files: List[UploadFile]):
 
     # Save image to UploadImg
     for image in files:
+        print(image.file)
         with open("uploadImg/" + str(image.filename), "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 

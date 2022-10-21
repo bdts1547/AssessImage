@@ -14,7 +14,7 @@ bf = cv2.BFMatcher()
 ## Run whole process
 ####################
 
-def detecting_mirrorLine(picture_name: str, show_detail = True):
+def detecting_mirrorLine(picture_name: str, show_detail = False):
     """
     Main function
     

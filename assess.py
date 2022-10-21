@@ -24,6 +24,7 @@ def backlit_detect(img, threshold=0.5):
     img_ycbcr = color.rgb2ycbcr(img)
     h, w, c = img_ycbcr.shape
     s0 = h * w
+    
     # Calculate Cb
     cb = img_ycbcr[:,:,1]
     s1 = (cb < 112).sum().astype(np.float64) # xCb < 112
@@ -31,8 +32,8 @@ def backlit_detect(img, threshold=0.5):
 
     # Calculate Cr
     cr = img_ycbcr[:,:,2]
-    s3 = (cr < 112).sum() # xCb < 112
-    s4 = (cr > 143).sum() # xCb > 143
+    s3 = (cr < 112).sum().astype(np.float64) # xCb < 112
+    s4 = (cr > 143).sum().astype(np.float64) # xCb > 143
 
     s5 = s1 + s4
     s6 = s2 + s3
@@ -42,8 +43,8 @@ def backlit_detect(img, threshold=0.5):
     # Calculate
     luminance = img_ycbcr[:,:,0]
     s9 = luminance.shape[0] * luminance.shape[1]
-    s10 = (luminance < 32).sum()
-    s11 = (luminance > 159).sum()
+    s10 = (luminance < 32).sum().astype(np.float64)
+    s11 = (luminance > 159).sum().astype(np.float64)
 
 
     is_candidate = False
