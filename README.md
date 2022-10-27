@@ -16,6 +16,8 @@
 - Create environment python 2.7.18 with name "py27" to call symmetry detection
   ```
     conda create -n py27 python=2.7.18 -y
+    conda activate py27
+    pip instasll matplotlib numpy scikit-image scipy
   ```
 
 
