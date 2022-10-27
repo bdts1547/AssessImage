@@ -61,61 +61,34 @@ def evaluate_each_layout(path_folders_images, layout=None):
     x, y, pred, imgs_name = [], [], [], []
 
     # Process symmetry
-    if layout == 'symmetry':
-        for folder in list_folders:
-            if folder == layout:
-                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-                list_images.sort()
-                for filename in list_images:
-                    if filename.split('.')[1] == 'png':
-                        image_path = os.path.join(path_folders_images, folder, 'img',filename)
-                        img = cv2.imread(image_path)
-                        r, theta = detecting_mirrorLine(image_path)
-                        x.append([r, theta, img])
-                        y.append(1)
-                        imgs_name.append(filename)
-            else:
-                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-                list_images.sort()
-                for filename in list_images:
-                    if filename.split('.')[1] == 'png':
-                        image_path = os.path.join(path_folders_images, folder, 'img',filename)
-                        img = cv2.imread(image_path)
-                        r, theta = detecting_mirrorLine(image_path)
-                        x.append([r, theta, img])
-                        y.append(0)
-                        imgs_name.append(filename)
+    for folder in list_folders:
+        if folder == layout:
+            list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+            list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
+            list_images.sort()
+            list_maps.sort()
+            for filename in list_images:
+                if filename.split('.')[1] == 'png':
+                    img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
+                    img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
 
-           
-    else:
-        for folder in list_folders:
-            if folder == layout:
-                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-                list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
-                list_images.sort()
-                list_maps.sort()
-                for filename in list_images:
-                    if filename.split('.')[1] == 'png':
-                        img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
-                        img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
+                    x.append([img, img_gray])
+                    y.append(1)
+                    imgs_name.append(filename)
+        else:
+            list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
+            list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
+            list_images.sort()
+            list_maps.sort()
 
-                        x.append([img, img_gray])
-                        y.append(1)
-                        imgs_name.append(filename)
-            else:
-                list_images = os.listdir(os.path.join(path_folders_images, folder, 'img'))
-                list_maps = os.listdir(os.path.join(path_folders_images, folder, 'mask'))
-                list_images.sort()
-                list_maps.sort()
+            for filename in list_images:
+                if filename.split('.')[1] == 'png':
+                    img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
+                    img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
 
-                for filename in list_images:
-                    if filename.split('.')[1] == 'png':
-                        img = cv2.imread(os.path.join(path_folders_images, folder, 'img',filename))
-                        img_gray = cv2.imread(os.path.join(path_folders_images, folder, 'mask', filename), 0)
-
-                        x.append([img, img_gray])
-                        y.append(0)
-                        imgs_name.append(filename)
+                    x.append([img, img_gray])
+                    y.append(0)
+                    imgs_name.append(filename)
 
     # prediction
     if layout == 'center':
@@ -261,6 +234,8 @@ def evaluate_backlit(path_backlit_imgs, path_normal_imgs, threshold=0.5, is_plot
     for filename in backlit_imgs:
         if filename.split('.')[1] == 'png':
             img = cv2.imread(os.path.join(path_backlit_imgs, filename))
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
             x.append(img)
             y.append(1)
             imgs_name.append(filename)
@@ -268,6 +243,8 @@ def evaluate_backlit(path_backlit_imgs, path_normal_imgs, threshold=0.5, is_plot
     for filename in normal_imgs:
         if filename.split('.')[1] == 'png':
             img = cv2.imread(os.path.join(path_normal_imgs, filename))
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            
             x.append(img)
             y.append(0)
             imgs_name.append(filename)
@@ -443,18 +420,18 @@ if __name__ == "__main__":
     # evaluate_each_layout("img_evaluate/Dataset_Layout", 'symmetry')
     # evaluate_backlit("img_evaluate/Dataset/Dataset_Backlit/Backlit", 
     #     "img_evaluate/Dataset/Dataset_Backlit/Normal_light", 0.5, True)
-    evaluate_contrast("img_evaluate/Dataset/Dataset_Contrast_New/low",
-        "img_evaluate/Dataset/Dataset_Contrast_New/high", 0.65, False)
+    evaluate_backlit("Dataset_Backlit/Backlit",
+        "Dataset_Backlit/Normal_light", 0.5, True)
     # evaluate_blur( "img_evaluate/Dataset/Dataset_Blur/Blur/", 
     # "img_evaluate/Dataset/Dataset_Blur/NotBlur/", 5000, False)
-    print("Done!")
+    # print("Done!")
 
 
     ### Backlit ####
     # rst = []
     # threshold = np.arange(0, 1.5, 0.05)
     # for t in threshold:
-    #     rst.append(evaluate_backlit( "img_evaluate/Dataset/Dataset_Blur/Blur/", "img_evaluate/Dataset/Dataset_Blur/NotBlur/", t))
+    #     rst.append(evaluate_backlit( "Dataset_Backlit/Backlit", "Dataset_Backlit/Normal_light", t))
 
     # plt.plot(threshold, rst)
     # plt.xlabel('Threshold')

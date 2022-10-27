@@ -55,7 +55,7 @@ async def assess_image(files: List[UploadFile]):
 
     # Find score symmetry
     start = time.time()
-    os.system("conda activate py27 & python symmary.py")
+    os.system("conda activate py27 & python detect_symmetry.py")
     end = time.time()
     print("Time running Score-symmetry: {:.2f}".format(end-start))
 

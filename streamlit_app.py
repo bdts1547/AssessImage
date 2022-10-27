@@ -3,11 +3,13 @@ from typing import List
 import shutil
 import sys
 import os
+import time
 
 from main_tracer import find_mask
 import assess
 import streamlit as st
 import cv2
+import numpy as np
 cv2.setNumThreads(0)
 
 def main_gui():  
@@ -19,7 +21,7 @@ def main_gui():
         uploaded_files = st.file_uploader("Chọn file ảnh", type=["jpeg", "jpg", "png"], accept_multiple_files = True)
         submitted = st.form_submit_button("Xác nhận")
 
-    print(uploaded_files)
+    # print(uploaded_files)
     if uploaded_files is not None:
         if os.path.exists('data/upload/'):
             # Clear folder
@@ -33,11 +35,15 @@ def main_gui():
             with open("data/upload/" + uploaded_file.name, "wb") as buffer:
                 buffer.write(uploaded_file.getvalue())
         
-        # # Find SOD
+        # Find SOD
         find_mask()
 
         # Find score symmetry
-        os.system("conda activate py27 & python symmary.py")
+        start = time.time()
+        os.system("conda activate py27 & python detect_symmetry.py")
+        end = time.time()
+        print("Time running Score-symmetry: {:.2f}".format(end-start))
+
         scores_sym = {}
         with open('score_symmetry.csv', 'r') as f:
             lines = f.read().splitlines()
@@ -48,17 +54,9 @@ def main_gui():
 
 
         results = []
+        path_imgs = []
+        path_mask = []
         for uploaded_file in uploaded_files:
-            # if not os.path.exists('data/upload'):
-            #     os.makedirs('data/upload')
-            # with open("data/upload/" + uploaded_file.name, "wb") as buffer:
-            #     buffer.write(uploaded_file.getvalue())
-            # # Find SOD
-            # find_mask()
-
-            # # Assess Image
-            # result = []
-            # for img in files:
             fn = uploaded_file.name
             score_sym = scores_sym[fn]
             img_path = os.path.join('data/upload/', fn)
@@ -66,6 +64,45 @@ def main_gui():
             mask_path = os.path.join('mask/upload/', fn_mask)
             rst = assess.assess_image(fn, img_path, mask_path, score_sym)
             results.append(rst)
+            path_imgs.append(img_path)
+            path_mask.append(mask_path)
+
+
+        def header(title):
+            return '<h2 style="font-size: 20px;">{}</h2>'.format(title)
+
+        if results:
+
+            # Show sidebar
+            with st.sidebar:
+                backlit = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['Backlit'])
+                contrast = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Contrast'])
+                blur = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Blur'])
+                layout = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['Layout'])
+
+                # st.header('Ngược sáng')
+                st.markdown(header('Ngược sáng'), unsafe_allow_html=True)
+                st.markdown(backlit, unsafe_allow_html=True)
+
+                # st.header('Tương phản')
+                st.markdown(header('Tương phản'), unsafe_allow_html=True)
+                st.markdown(contrast, unsafe_allow_html=True)
+
+                # st.header('Mờ')
+                st.markdown(header('Độ mờ'), unsafe_allow_html=True)
+                st.markdown(blur, unsafe_allow_html=True)
+
+                # st.header('Bố cục')
+                st.markdown(header('Bố cục'), unsafe_allow_html=True)
+                st.markdown(layout, unsafe_allow_html=True)
+                
+            
+            img = cv2.imread(path_imgs[0])
+            mask = cv2.imread(path_mask[0])
+            concat = np.hstack((img, mask))
+            st.image(cv2.cvtColor(concat, cv2.COLOR_BGR2RGB), width=None)
+
+        st.markdown(header('Ảnh'), unsafe_allow_html=True)
         st.write(results)
         
         if os.path.exists('data/upload/'):
