@@ -12,7 +12,7 @@
     conda create -n my_env python=3.7.13 -y
     pip install -r requirements.txt
   ```
-- Create environment python 2.7.18 to call symmetry detection
+- Create environment python 2.7.18 with name "py27" to call symmetry detection
   ```
     conda create -n py27 python=2.7.18 -y
   ```
