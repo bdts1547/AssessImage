@@ -1,5 +1,6 @@
 # AssessImage
-
+## Description
+  The application will evaluate the image quality based on 4 criteria of backlit, contrast, blur, composition.
 
 ## Installation
 - Clone project
