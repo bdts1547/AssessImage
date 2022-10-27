@@ -285,25 +285,25 @@ def detect_layout(img_rgb, img_gray, filename, score_sym, threshold_sym=0.6):
 
     if is_symmetry:
         if is_onethird: 
-            save_image(img_bb, img_bin, "OneThird, Symmetry", filename)
-            return "OneThird, Symmetry"
+            save_image(img_bb, img_bin, "Onethird, Symmetry", filename)
+            return "Một phần ba, Đối xứng"
         elif is_center: 
             save_image(img_bb, img_bin, "Center, Symmetry", filename)
-            return "Center, Symmetry"
+            return "Trung tâm, Đối xứng"
         else:
             save_image(img_bb, img_bin, "Symmetry", filename)
-            return "Symmetry"
+            return "Đối xứng"
 
     else:
         if is_onethird: 
-            save_image(img_bb, img_bin, "OneThird", filename)
-            return "OneThird"
+            save_image(img_bb, img_bin, "Onethird", filename)
+            return "Một phần ba"
         elif is_center: 
             save_image(img_bb, img_bin, "Center", filename)
-            return "Center"
+            return "Trung tâm"
         else:
             save_image(img_bb, img_bin, "Not Layout", filename)
-            return "No Layout"
+            return "Không tìm được"
     
 
 def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percentile=99):
@@ -336,7 +336,7 @@ def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percen
 
 
 def percent_blur_(img, threshold=1000):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     fm = cv2.Laplacian(gray, cv2.CV_64F).var()
 
     if fm < 0: fm = 0
@@ -350,6 +350,7 @@ def percent_blur_(img, threshold=1000):
 def assess_image(filename, path_image, path_pred_map, score_sym):
     print('Asssessing')
     img = cv2.imread(path_image)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     gray = cv2.imread(path_pred_map, 0)
 
     
@@ -357,10 +358,12 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
     # start = time.time()
     is_backlit, thres_bl = backlit_detect(img, 0.8)
     if is_backlit:
+        str_backlit = "Có"
         if thres_bl < 0.15: thres_bl = 0.15    # Min các của giá trị s11/s9
         elif thres_bl > 0.8: thres_bl = 0.8
         percent_backlit = 100 - ((thres_bl - 0.15) / (0.8 - 0.15) * 100)
     else:
+        str_backlit = "Không"
         percent_backlit = 0
     # end = time.time()
     # print("Time running Backlit: {:.2f}".format(end-start))
@@ -387,7 +390,7 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
     mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,
-            'Backlit': percent_backlit,
+            'Backlit': str_backlit,
             'Contrast': percent_lcontrast,
             'Blur': percent_blur,
             'Layout': layout,
