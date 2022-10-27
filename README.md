@@ -10,6 +10,7 @@
 - Create environment python 3.7.13 with **[Anaconda](https://www.anaconda.com/)** and install requirements
   ```
     conda create -n my_env python=3.7.13 -y
+    conda activate my_env
     pip install -r requirements.txt
   ```
 - Create environment python 2.7.18 with name "py27" to call symmetry detection
