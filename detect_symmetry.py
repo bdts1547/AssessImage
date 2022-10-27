@@ -39,17 +39,17 @@ def get_symmetry(normalized_histogram_orig, normalized_histogram_flip):
 
 def load_model(model):
     if model == "alexnet":
-        model_weights = os.path.join('Models/bvlc_alexnet/bvlc_alexnet.caffemodel')
-        model_model = os.path.join('Models/bvlc_alexnet/deploy.prototxt')
-        net_mean = np.load('Models/ilsvrc_2012_mean.npy').mean(1).mean(1)
+        model_weights = os.path.join('model_symmetry/bvlc_alexnet/bvlc_alexnet.caffemodel')
+        model_model = os.path.join('model_symmetry/bvlc_alexnet/deploy.prototxt')
+        net_mean = np.load('model_symmetry/ilsvrc_2012_mean.npy').mean(1).mean(1)
     elif model == "alexnet512":
-        model_weights = os.path.join('Models/bvlc_alexnet/bvlc_alexnet.caffemodel')
-        model_model = os.path.join('Models/bvlc_alexnet/deploy-512.prototxt')
-        net_mean = np.load('Models/ilsvrc_2012_mean.npy').mean(1).mean(1)
+        model_weights = os.path.join('model_symmetry/bvlc_alexnet/bvlc_alexnet.caffemodel')
+        model_model = os.path.join('model_symmetry/bvlc_alexnet/deploy-512.prototxt')
+        net_mean = np.load('model_symmetry/ilsvrc_2012_mean.npy').mean(1).mean(1)
     elif model == "alexnet600x800":
-        model_weights = os.path.join('Models/bvlc_alexnet/bvlc_alexnet.caffemodel')
-        model_model = os.path.join('Models/bvlc_alexnet/deploy-600x800.prototxt')
-        net_mean = np.load('Models/ilsvrc_2012_mean.npy').mean(1).mean(1)
+        model_weights = os.path.join('model_symmetry/bvlc_alexnet/bvlc_alexnet.caffemodel')
+        model_model = os.path.join('model_symmetry/bvlc_alexnet/deploy-600x800.prototxt')
+        net_mean = np.load('model_symmetry/ilsvrc_2012_mean.npy').mean(1).mean(1)
     else:
         assert False, "Unknown model"
 
