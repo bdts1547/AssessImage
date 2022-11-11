@@ -36,6 +36,6 @@ def find_mask():
     Inference(args, save_path).test()
 
 
-if __name__ == '__main__':
-    find_mask()
+# if __name__ == '__main__':
+#     find_mask()
     # pass

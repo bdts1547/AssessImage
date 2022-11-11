@@ -12,13 +12,14 @@
   ```
     conda create -n my_env python=3.7.13 -y
     conda activate my_env
+    pip install --ignore-installed --upgrade my_env
     pip install -r requirements.txt
   ```
 - Create environment python 2.7.18 with name "py27" to call symmetry detection
   ```
     conda create -n py27 python=2.7.18 -y
     conda activate py27
-    pip instasll matplotlib numpy scikit-image scipy
+    pip install matplotlib numpy scikit-image scipy protobuf
   ```
 
 

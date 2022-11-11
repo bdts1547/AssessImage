@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import cv2
+
 import time
 from skimage import io, data, color
 
@@ -18,6 +19,10 @@ import imutils
 # Blur
 from imutils import paths
 import argparse
+
+# Import from file
+from detect_backlit import predict_backlit
+
 
 
 def backlit_detect(img, threshold=0.5):
@@ -169,15 +174,20 @@ def detect_layout_center(img, centers, ratio=1/3):
     p2 = np.asarray([w//2, h])  # mid-bottom
     
     if len(centers) == 0:
-        return False
+        return False, 0
  
     is_center = True
+    max_score = 0
     for center in centers:
         # Calc distance from point to mid-line
         d = np.linalg.norm(np.cross(p2-p1, p1-center))/ np.linalg.norm(p2-p1)
-        # print(d)
+        score = 1 - d / margin_width
+
+        if max_score < score:
+            max_score = score
         if d > margin_width:
             is_center = False
+            break
 
     # for center in centers[1:]:
     #     d = distance.euclidean(center_img, center)
@@ -185,7 +195,7 @@ def detect_layout_center(img, centers, ratio=1/3):
     #         isCenter = False
         
     
-    return is_center
+    return is_center, max_score
 
 
 def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
@@ -205,20 +215,24 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
     margin_width = w * ratio / 2
 
     if len(centers) == 0:
-        return False
+        return False, 0
 
     is_onethird = True
+    max_score = 0
     for center in centers:
         # Calc distance from point to line 1-3,2-3
         d13 = np.linalg.norm(np.cross(g2-g1, g1-center)) / np.linalg.norm(g2-g1)
         d23 = np.linalg.norm(np.cross(g4-g3, g3-center)) / np.linalg.norm(g4-g3)
         d = min(d13, d23)
+        score = 1 - d / margin_width
 
-        # print(d)
+        if max_score < score:
+            max_score = score
         if d > margin_width:
             is_onethird = False
+            break
 
-    return is_onethird
+    return is_onethird, max_score
 
 
 def check_is_center_or_onethird(img, centers):
@@ -264,18 +278,21 @@ def detect_layout(img_rgb, img_gray, filename, score_sym, threshold_sym=0.6):
     img_bb, obj_centers, bboxes = get_bbox(img_bin, img_rgb)
     
 
-    is_center = False
-    is_onethird = False
-    is_symmetry = max(score_sym) > threshold_sym
+    # is_center = False
+    # is_onethird = False
+    max_score_sym = max(score_sym)
+    is_symmetry = max_score_sym > threshold_sym
     
     
     # Detect center
-    if detect_layout_center(img_bb, obj_centers):
-        is_center = True
+    is_center, score_center = detect_layout_center(img_bb, obj_centers)
+    # if detect_layout_center(img_bb, obj_centers):
+    #     is_center = True
     
     # Detect one-third
-    if detect_layout_onethird(img_bb, obj_centers, bboxes):
-        is_onethird = True
+    is_onethird, score_onethird = detect_layout_onethird(img_bb, obj_centers, bboxes)
+    # if detect_layout_onethird(img_bb, obj_centers, bboxes):
+    #     is_onethird = True
     
 
     # Compare distince center/onethird
@@ -286,27 +303,27 @@ def detect_layout(img_rgb, img_gray, filename, score_sym, threshold_sym=0.6):
     if is_symmetry:
         if is_onethird: 
             save_image(img_bb, img_bin, "Onethird, Symmetry", filename)
-            return "Một phần ba, Đối xứng"
+            return "Một phần ba, Đối xứng", [score_onethird, max_score_sym]
         elif is_center: 
             save_image(img_bb, img_bin, "Center, Symmetry", filename)
-            return "Trung tâm, Đối xứng"
+            return "Trung tâm, Đối xứng", [score_center, max_score_sym]
         else:
             save_image(img_bb, img_bin, "Symmetry", filename)
-            return "Đối xứng"
+            return "Đối xứng", [max_score_sym]
 
     else:
         if is_onethird: 
             save_image(img_bb, img_bin, "Onethird", filename)
-            return "Một phần ba"
+            return "Một phần ba", [score_onethird]
         elif is_center: 
             save_image(img_bb, img_bin, "Center", filename)
-            return "Trung tâm"
+            return "Trung tâm", [score_center]
         else:
             save_image(img_bb, img_bin, "Not Layout", filename)
-            return "Không tìm được"
+            return "Không tìm được", [0]
     
 
-def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percentile=99):
+def percent_contrast_(image, threshold=0.65, lower_percentile=1, upper_percentile=99):
    
     from skimage.util.dtype import dtype_range, dtype_limits
     from skimage.color import rgb2gray, rgba2rgb
@@ -331,11 +348,11 @@ def percent_low_contrast(image, threshold=0.65, lower_percentile=1, upper_percen
 
     # percent = 100 - (ratio / _max * 100)
     percent = (ratio / _max * 100)
-    
-    return percent
+    score = percent / 10
+    return percent, score
 
 
-def percent_blur_(img, threshold=1000):
+def percent_blur_(img, threshold=1500):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     fm = cv2.Laplacian(gray, cv2.CV_64F).var()
 
@@ -343,8 +360,8 @@ def percent_blur_(img, threshold=1000):
     if fm > threshold: fm = threshold
 
     percent = 100 - (fm / threshold * 100)
-
-    return percent
+    score = (fm / threshold) * 10
+    return percent, score
 
 
 def assess_image(filename, path_image, path_pred_map, score_sym):
@@ -355,47 +372,62 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
 
     
     # Backlit
+    prob_backlit = predict_backlit(img_rgb=img)
+    score_backlit = prob_backlit * 10
+
     # start = time.time()
-    is_backlit, thres_bl = backlit_detect(img, 0.8)
-    if is_backlit:
-        str_backlit = "Có"
-        if thres_bl < 0.15: thres_bl = 0.15    # Min các của giá trị s11/s9
-        elif thres_bl > 0.8: thres_bl = 0.8
-        percent_backlit = 100 - ((thres_bl - 0.15) / (0.8 - 0.15) * 100)
-    else:
-        str_backlit = "Không"
-        percent_backlit = 0
+    # is_backlit, thres_bl = backlit_detect(img, 0.8)
+    # if is_backlit:
+    #     str_backlit = "Có"
+    #     score_backlit = 0
+    #     if thres_bl < 0.15: thres_bl = 0.15    # Min các của giá trị s11/s9
+    #     elif thres_bl > 0.8: thres_bl = 0.8
+    #     percent_backlit = 100 - ((thres_bl - 0.15) / (0.8 - 0.15) * 100)
+    # else:
+    #     score_backlit = 10
+    #     str_backlit = "Không"
+    #     percent_backlit = 0
     # end = time.time()
     # print("Time running Backlit: {:.2f}".format(end-start))
     
     
     # Layout
     # start = time.time()
-    layout = detect_layout(img, gray, filename, score_sym)
+    # Tính layout, score | càng gần với bố cục thì điểm số càng lớn
+    layout, scores_layout = detect_layout(img, gray, filename, score_sym)
+    score_layout = (sum(scores_layout) / len(scores_layout)) * 10
     # end = time.time()
     # print("Time running Layout: {:.2f}".format(end-start))
     
     # Contrast
     # start = time.time()
-    percent_lcontrast = percent_low_contrast(img)
+    percent_contrast, score_contrast = percent_contrast_(img)
     # end = time.time()
     # print("Time running Contrast: {:.2f}".format(end-start))
 
     # Sharpness
     # start = time.time()
-    percent_blur = percent_blur_(img)
+    percent_blur, score_blur = percent_blur_(img)
     # end = time.time()
     # print("Time running Sharpness: {:.2f}".format(end-start))
-  
+
+    
+    
+    score = (score_backlit + score_contrast + score_blur + 1*score_layout) / 4.0
     mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,
-            'Backlit': str_backlit,
-            'Contrast': percent_lcontrast,
+            'Backlit': score_backlit,
+            'Contrast': percent_contrast,
             'Blur': percent_blur,
             'Layout': layout,
             'mask_path': mask_path,
             'max_score_symmetry': max(score_sym),
+            'score': score,
+            'backlit_score': score_backlit,
+            'constrast_score': score_contrast,
+            'blur_score': score_blur,
+            'layout_score': score_layout,
            }
 
     return rst

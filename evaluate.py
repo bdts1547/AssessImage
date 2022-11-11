@@ -23,11 +23,13 @@ def convert_files(path_folder, prefix):
         old_file = os.path.join(path_folder, filename)
         os.remove(old_file)
 
+
 def rename_files(path_folder, prefix):
     for i, filename in enumerate(os.listdir(path_folder)):
         old_file = os.path.join(path_folder, filename)
         new_file = os.path.join(path_folder, prefix + '_' + str(i) + '.png')
         os.rename(old_file, new_file)
+
 
 def plot_dataset(path_folders, xlabel, title):
     # creating the dataset
@@ -51,7 +53,7 @@ def plot_dataset(path_folders, xlabel, title):
     plt.title(title)
     plt.show()
 
-# Evaluate layout
+
 def evaluate_each_layout(path_folders_images, layout=None):
     # layout: center| symmetry | onethird
     print("Evaluating...")
@@ -130,6 +132,7 @@ def evaluate_each_layout(path_folders_images, layout=None):
 
     return acc
 
+
 def detect_blur_1(img, threshold=500):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # fm = variance_of_laplacian(gray)
@@ -138,6 +141,7 @@ def detect_blur_1(img, threshold=500):
     if fm < threshold:
         return True
     else: return False
+
 
 def evaluate_blur(path_positive, path_negative, threshold, is_plot=False):
     print("Evaluating")
@@ -221,6 +225,7 @@ def evaluate_blur(path_positive, path_negative, threshold, is_plot=False):
 
 
         return acc
+
 
 def evaluate_backlit(path_backlit_imgs, path_normal_imgs, threshold=0.5, is_plot=False):
     print("Evaluating...")
@@ -381,25 +386,24 @@ def evaluate_contrast(path_backlit_imgs, path_normal_imgs, threshold=0.8, is_plo
         #     # plt.title(name)
         #     plt.show()
 
-        print('view false')
-        for name, img in zip(name_false, imgs_false):
-            fig, ax = plt.subplots(1, 2, figsize=(16, 8))
+        # print('view false')
+        # for name, img in zip(name_false, imgs_false):
+        #     fig, ax = plt.subplots(1, 2, figsize=(16, 8))
 
-            ax[0].set_title(name)
-            ax[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        #     ax[0].set_title(name)
+        #     ax[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
-            histr = cv2.calcHist([img],[0],None,[256],[0,256])
-            # ax[1].hist(img.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
-            # ax[1].plot(histr)
-            ax[1].hist(img.ravel(),256,[0,256])
+        #     histr = cv2.calcHist([img],[0],None,[256],[0,256])
+        #     # ax[1].hist(img.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
+        #     # ax[1].plot(histr)
+        #     ax[1].hist(img.ravel(),256,[0,256])
             
-            # plt.figure()
-            # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            # plt.title(name)
-            plt.show()
+        #     # plt.figure()
+        #     # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        #     # plt.title(name)
+        #     plt.show()
 
         return acc
-
 
 
 def detect_low_contrast(img, threshold=0.8):
@@ -414,14 +418,16 @@ def detect_low_contrast(img, threshold=0.8):
         return False
 
 
+def create_annotate_AVA():
+    
 
 if __name__ == "__main__":
     # plot_dataset("img_evaluate/Dataset/Dataset_Blur", " ", "Dataset_Blur")
     # evaluate_each_layout("img_evaluate/Dataset_Layout", 'symmetry')
     # evaluate_backlit("img_evaluate/Dataset/Dataset_Backlit/Backlit", 
     #     "img_evaluate/Dataset/Dataset_Backlit/Normal_light", 0.5, True)
-    evaluate_backlit("Dataset_Backlit/Backlit",
-        "Dataset_Backlit/Normal_light", 0.5, True)
+    # evaluate_backlit("Dataset_Backlit/Backlit",
+    #     "Dataset_Backlit/Normal_light", 0.5, True)
     # evaluate_blur( "img_evaluate/Dataset/Dataset_Blur/Blur/", 
     # "img_evaluate/Dataset/Dataset_Blur/NotBlur/", 5000, False)
     # print("Done!")
@@ -471,3 +477,6 @@ if __name__ == "__main__":
     # plt.xlabel('Threshold')
     # plt.ylabel('Acc')
     # plt.show()
+
+
+

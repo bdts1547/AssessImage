@@ -79,6 +79,8 @@ def main_gui():
                 contrast = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Contrast'])
                 blur = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Blur'])
                 layout = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['Layout'])
+                score = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['score'])
+
 
                 # st.header('Ngược sáng')
                 st.markdown(header('Ngược sáng'), unsafe_allow_html=True)
@@ -95,6 +97,9 @@ def main_gui():
                 # st.header('Bố cục')
                 st.markdown(header('Bố cục'), unsafe_allow_html=True)
                 st.markdown(layout, unsafe_allow_html=True)
+
+                st.markdown(header('Điểm'), unsafe_allow_html=True)
+                st.markdown(score, unsafe_allow_html=True)
                 
             
             img = cv2.imread(path_imgs[0])

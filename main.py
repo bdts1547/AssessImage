@@ -62,6 +62,7 @@ async def assess_image(files: List[UploadFile]):
     scores_sym = {}
     with open('score_symmetry.csv', 'r') as f:
         lines = f.read().splitlines()
+        # print("Score sym:", lines)
         
     for line in lines:
         d = list(map(str, line.split(',')))

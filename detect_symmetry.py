@@ -120,7 +120,7 @@ def run_process_images(args, files_dict, callback=None):
             img_name = os.path.join(args.var_root, k, f)
             
 
-            # print(img_name, args.var_root, k, f)
+            print(img_name, args.var_root, k, f)
             img = caffe.io.load_image(img_name)
             source_img = transformer.preprocess('data',img)[None,:]
             net.forward(data = source_img)
@@ -162,7 +162,8 @@ def run_process_images(args, files_dict, callback=None):
             else:
                 assert False
 
-            # print(vals)
+            print(vals)
+            print("Write")
             if args.var_run_symmetry:
                 log.write(os.path.basename(f)+","+",".join([str(r) for r in vals])+"\n")
 
@@ -220,7 +221,7 @@ def run():
     else:
         # step_callback("error")
         # print("Error while running symmetry!")
-        assert False 
+        return False 
         
 
 

@@ -1,5 +1,7 @@
 model_symmetry
+model_backlit
 data
-layout
-mask
-object
+layout/*
+mask/*
+object/*
+uploadImg/*
