@@ -15,8 +15,8 @@ warnings.filterwarnings('ignore')
 
 def find_mask():
     args = getConfig()
-    print('<---- Training Params ---->')
-    pprint.pprint(args)
+    # print('<---- Training Params ---->')
+    # pprint.pprint(args)
 
     # Random Seed
     seed = args.seed

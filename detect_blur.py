@@ -10,7 +10,7 @@ import numpy as np
 def predict_blur(image_gray):
 
     # Load model
-    with open("model_blur/svm_c100_linear_SDM.pkl", "rb") as f:
+    with open("MODELS/model_blur/svm_c100_linear_SDM.pkl", "rb") as f:
         clf = pickle.load(f)
 
     lap_feat = laplace(image_gray)

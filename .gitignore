@@ -1,6 +1,4 @@
-model_symmetry
-model_backlit
-model_blur
+MODELS
 data
 layout/*
 mask/*

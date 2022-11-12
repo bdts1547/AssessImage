@@ -6,7 +6,7 @@ import os
 
 def predict_backlit(img_rgb):
     # Load model
-    model = keras.models.load_model('model_backlit')
+    model = keras.models.load_model('MODELS/model_backlit')
 
     img_ycbcr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCR_CB)
     img_ycbcr = cv2.resize(img_ycbcr, (256, 256))
