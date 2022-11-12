@@ -22,7 +22,7 @@ import argparse
 
 # Import from file
 from detect_backlit import predict_backlit
-
+from detect_blur import predict_blur
 
 
 def backlit_detect(img, threshold=0.5):
@@ -168,7 +168,7 @@ def detect_layout_center(img, centers, ratio=1/3):
     
 
     (h, w, c) = img.shape
-    margin_width = w * ratio / 2 # Distance from image center to axis 1/3, 2/3
+    margin_width = w * ratio / 3 # Distance from image center to axis 1/3, 2/3
     
     p1 = np.asarray([w//2, 0])  # mid-top
     p2 = np.asarray([w//2, h])  # mid-bottom
@@ -193,7 +193,8 @@ def detect_layout_center(img, centers, ratio=1/3):
     #     d = distance.euclidean(center_img, center)
     #     if (d > threshold):
     #         isCenter = False
-        
+    if is_center == False:
+        max_score = 0
     
     return is_center, max_score
 
@@ -212,7 +213,7 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
     g3 = np.asarray([w * 2/3, h * 1/3])    # right-top
     g4 = np.asarray([w * 2/3, h * 2/3])    # right-bottom
 
-    margin_width = w * ratio / 2
+    margin_width = w * ratio / 3
 
     if len(centers) == 0:
         return False, 0
@@ -231,6 +232,9 @@ def detect_layout_onethird(img, centers, bboxes, ratio=1/3):
         if d > margin_width:
             is_onethird = False
             break
+
+    if is_onethird == False:
+        max_score = 0
 
     return is_onethird, max_score
 
@@ -367,13 +371,15 @@ def percent_blur_(img, threshold=1500):
 def assess_image(filename, path_image, path_pred_map, score_sym):
     print('Asssessing')
     img = cv2.imread(path_image)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    gray = cv2.imread(path_pred_map, 0)
+    img_gray = cv2.imread(path_image, 0)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    mask_gray = cv2.imread(path_pred_map, 0)
 
     
     # Backlit
-    prob_backlit = predict_backlit(img_rgb=img)
-    score_backlit = prob_backlit * 10
+    prob_backlit = predict_backlit(img_rgb=img_rgb)
+    score_backlit = 10 - prob_backlit * 10
+    percent_backlit = prob_backlit * 100
 
     # start = time.time()
     # is_backlit, thres_bl = backlit_detect(img, 0.8)
@@ -394,20 +400,23 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
     # Layout
     # start = time.time()
     # Tính layout, score | càng gần với bố cục thì điểm số càng lớn
-    layout, scores_layout = detect_layout(img, gray, filename, score_sym)
+    layout, scores_layout = detect_layout(img_rgb, mask_gray, filename, score_sym)
     score_layout = (sum(scores_layout) / len(scores_layout)) * 10
     # end = time.time()
     # print("Time running Layout: {:.2f}".format(end-start))
     
     # Contrast
     # start = time.time()
-    percent_contrast, score_contrast = percent_contrast_(img)
+    percent_contrast, score_contrast = percent_contrast_(img_rgb)
     # end = time.time()
     # print("Time running Contrast: {:.2f}".format(end-start))
 
     # Sharpness
     # start = time.time()
-    percent_blur, score_blur = percent_blur_(img)
+    percent_blur, percent_sharp = predict_blur(img_gray)
+    score_blur = percent_sharp * 10
+    percent_blur = percent_blur * 100
+    # percent_blur, score_blur = percent_blur_(img)
     # end = time.time()
     # print("Time running Sharpness: {:.2f}".format(end-start))
 
@@ -417,7 +426,7 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
     mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,
-            'Backlit': score_backlit,
+            'Backlit': percent_backlit,
             'Contrast': percent_contrast,
             'Blur': percent_blur,
             'Layout': layout,

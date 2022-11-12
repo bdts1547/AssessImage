@@ -162,8 +162,8 @@ def run_process_images(args, files_dict, callback=None):
             else:
                 assert False
 
-            print(vals)
-            print("Write")
+            # print(vals)
+            # print("Write")
             if args.var_run_symmetry:
                 log.write(os.path.basename(f)+","+",".join([str(r) for r in vals])+"\n")
 

@@ -75,11 +75,11 @@ def main_gui():
 
             # Show sidebar
             with st.sidebar:
-                backlit = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['Backlit'])
+                backlit = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Backlit'])
                 contrast = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Contrast'])
                 blur = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['Blur'])
                 layout = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['Layout'])
-                score = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{}</p>'.format(results[0]['score'])
+                score = '<p style="font-size: 20px; margin-left: 12px; color: rgb(9, 171, 59);">{:.2f}</p>'.format(results[0]['score'])
 
 
                 # st.header('Ngược sáng')

@@ -1,5 +1,6 @@
 model_symmetry
 model_backlit
+model_blur
 data
 layout/*
 mask/*

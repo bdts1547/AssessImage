@@ -12,7 +12,7 @@
   ```
     conda create -n my_env python=3.7.13 -y
     conda activate my_env
-    pip install --ignore-installed --upgrade my_env
+    pip install --upgrade pip  # Need upgrade "pip" to install tensorflow
     pip install -r requirements.txt
   ```
 - Create environment python 2.7.18 with name "py27" to call symmetry detection

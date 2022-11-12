@@ -1,3 +1,4 @@
+tensorflow==2.10.0
 albumentations==1.0.3
 certifi==2022.9.14
 click==8.1.3
