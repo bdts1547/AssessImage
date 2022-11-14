@@ -1,5 +1,6 @@
 MODELS
 data
+text
 layout/*
 mask/*
 object/*

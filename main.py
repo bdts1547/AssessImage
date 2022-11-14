@@ -67,7 +67,7 @@ async def assess_image(files: List[UploadFile]):
     for line in lines:
         d = list(map(str, line.split(',')))
         scores_sym[d[0]] = list(map(float, d[1:]))
-    # print(scores_sym)
+    print(scores_sym)
 
 
     shutil.rmtree('data/upload/') # remove folder data/upload/
@@ -80,7 +80,11 @@ async def assess_image(files: List[UploadFile]):
         fn = img.filename
         score_sym = scores_sym[fn]
         img_path = os.path.join('uploadImg/', fn)
-        fn_mask = fn.split('.')[0] + '.png'
+
+        len_tail = len(fn.split('.')[-1])
+        fn_mask = fn[:-len_tail-1] + '.png'
+        print(fn_mask)
+
         mask_path = os.path.join('mask/upload/', fn_mask)
         rst = assess.assess_image(fn, img_path, mask_path, score_sym)
         result.append(rst)

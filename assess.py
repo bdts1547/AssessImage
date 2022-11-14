@@ -23,6 +23,7 @@ import argparse
 # Import from file
 from detect_backlit import predict_backlit
 from detect_blur import predict_blur
+import pickle
 
 
 def backlit_detect(img, threshold=0.5):
@@ -377,9 +378,9 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
 
     
     # Backlit
-    prob_backlit = predict_backlit(img_rgb=img_rgb)
-    score_backlit = 10 - prob_backlit * 10
-    percent_backlit = prob_backlit * 100
+    prob_backlit, score_backlit = predict_backlit(img_rgb=img_rgb)
+    # score_backlit = 10.0 - prob_backlit * 10.0
+    percent_backlit = prob_backlit * 100.0
 
     # start = time.time()
     # is_backlit, thres_bl = backlit_detect(img, 0.8)
@@ -420,9 +421,13 @@ def assess_image(filename, path_image, path_pred_map, score_sym):
     # end = time.time()
     # print("Time running Sharpness: {:.2f}".format(end-start))
 
+    with open('MODELS/model_reg_sklearn/linear_reg.pkl', 'rb') as f:
+        lr = pickle.load(f)
     
-    
-    score = (score_backlit + score_contrast + score_blur + 1*score_layout) / 4.0
+
+    scores = [score_backlit, score_contrast, score_blur, score_layout]
+    score = lr.predict([scores])[0]
+
     mask_path = 'layout/upload/' + filename
     rst = { 
             'File name': filename,

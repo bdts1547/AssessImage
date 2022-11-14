@@ -60,7 +60,10 @@ def main_gui():
             fn = uploaded_file.name
             score_sym = scores_sym[fn]
             img_path = os.path.join('data/upload/', fn)
-            fn_mask = fn.split('.')[0] + '.png'
+
+            len_tail = len(fn.split('.')[-1])
+            fn_mask = fn[:-len_tail-1] + '.png'
+
             mask_path = os.path.join('mask/upload/', fn_mask)
             rst = assess.assess_image(fn, img_path, mask_path, score_sym)
             results.append(rst)
