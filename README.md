@@ -7,7 +7,7 @@
   ```
     git clone https://github.com/bdts1547/AssessImage.git
   ```
-- Download, extract **[model_symmetry](https://drive.google.com/file/d/1MQ4uZo73lLqG8ri8Z43j98SffxmE4Iel/view?usp=sharing)** and put it in the folder AssessImage.
+- Download, extract **[model_symmetry](https://drive.google.com/file/d/1O5nzjuWbkFM68sFY2qYj6uFI0H14FOkZ/view?usp=share_link)** and put it in the folder AssessImage.
   ```
   AssessImage
   |-- caffe
