@@ -19,7 +19,7 @@ def getConfig():
 
     # Training parameter settings
     parser.img_size = 512
-    parser.batch_size = 32
+    parser.batch_size = 1
     parser.epochs = 100
     parser.lr = 5e-5
     parser.optimizer = 'Adam'
