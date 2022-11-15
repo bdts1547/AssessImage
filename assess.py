@@ -97,7 +97,7 @@ def save_image(img, img_thresh, title, filename):
 
     
     
-    fig.savefig('layout/upload/{}'.format(filename))
+    # fig.savefig('layout/upload/{}'.format(filename))
     # plt.close()
 
 
