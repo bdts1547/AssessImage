@@ -134,16 +134,19 @@ def run_process_images(args, files_dict, callback=None):
             if args.var_run_symmetry:
                 histogram8_orig,normalized_histogram8_orig = get_histogram(resp, patches=patches, f=np.max)
 
+                # Left-right
                 source_img = transformer.preprocess('data',np.fliplr(img))[None,:]
                 net.forward(data = source_img)
                 resp = net.blobs[layer].data[0]
                 histogram8_fliplr,normalized_histogram8_fliplr = get_histogram(resp, patches=patches, f=np.max)
 
+                # Up-down
                 source_img = transformer.preprocess('data',np.flipud(img))[None,:]
                 net.forward(data = source_img)
                 resp = net.blobs[layer].data[0]
                 histogram8_flipud,normalized_histogram8_flipud = get_histogram(resp, patches=patches, f=np.max)
 
+                # LRUD
                 source_img = transformer.preprocess('data',np.fliplr(np.flipud(img)))[None,:]
                 net.forward(data = source_img)
                 resp = net.blobs[layer].data[0]

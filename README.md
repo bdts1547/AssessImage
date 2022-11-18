@@ -30,11 +30,6 @@
 
 
 ## Run
-- Run with uvicorn
-  ```
-    conda activate my_env
-    uvicorn main:app
-  ```
 - Run with streamlit
   ```
     conda activate my_env

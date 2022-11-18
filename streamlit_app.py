@@ -115,6 +115,12 @@ def main_gui():
         
         if os.path.exists('data/upload/'):
             shutil.rmtree('data/upload/') # remove folder data/upload/
+        if os.path.exists('mask/upload/'):
+            shutil.rmtree('mask/upload')
+        if os.path.exists('object/upload/'):
+            shutil.rmtree('object/upload')
+        
+
         print('Done')
 
         
