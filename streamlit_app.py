@@ -86,22 +86,22 @@ def main_gui():
 
 
                 # st.header('Ngược sáng')
-                st.markdown(header('Ngược sáng'), unsafe_allow_html=True)
+                st.markdown(header('Backlit'), unsafe_allow_html=True)
                 st.markdown(backlit, unsafe_allow_html=True)
 
                 # st.header('Tương phản')
-                st.markdown(header('Tương phản'), unsafe_allow_html=True)
+                st.markdown(header('Contrast'), unsafe_allow_html=True)
                 st.markdown(contrast, unsafe_allow_html=True)
 
                 # st.header('Mờ')
-                st.markdown(header('Độ mờ'), unsafe_allow_html=True)
+                st.markdown(header('Blur'), unsafe_allow_html=True)
                 st.markdown(blur, unsafe_allow_html=True)
 
                 # st.header('Bố cục')
-                st.markdown(header('Bố cục'), unsafe_allow_html=True)
+                st.markdown(header('Layout'), unsafe_allow_html=True)
                 st.markdown(layout, unsafe_allow_html=True)
 
-                st.markdown(header('Điểm'), unsafe_allow_html=True)
+                st.markdown(header('Score'), unsafe_allow_html=True)
                 st.markdown(score, unsafe_allow_html=True)
                 
             

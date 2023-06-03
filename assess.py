@@ -308,24 +308,24 @@ def detect_layout(img_rgb, img_gray, filename, score_sym, threshold_sym=0.6):
     if is_symmetry:
         if is_onethird: 
             save_image(img_bb, img_bin, "Onethird, Symmetry", filename)
-            return "Một phần ba, Đối xứng", [score_onethird, max_score_sym]
+            return "Onethird, Symmetry", [score_onethird, max_score_sym]
         elif is_center: 
             save_image(img_bb, img_bin, "Center, Symmetry", filename)
-            return "Trung tâm, Đối xứng", [score_center, max_score_sym]
+            return "Center, Symmetry", [score_center, max_score_sym]
         else:
             save_image(img_bb, img_bin, "Symmetry", filename)
-            return "Đối xứng", [max_score_sym]
+            return "Symmetry", [max_score_sym]
 
     else:
         if is_onethird: 
             save_image(img_bb, img_bin, "Onethird", filename)
-            return "Một phần ba", [score_onethird]
+            return "Onethird", [score_onethird]
         elif is_center: 
             save_image(img_bb, img_bin, "Center", filename)
-            return "Trung tâm", [score_center]
+            return "Center", [score_center]
         else:
             save_image(img_bb, img_bin, "Not Layout", filename)
-            return "Không tìm được", [0]
+            return "Not find", [0]
     
 
 def percent_contrast_(image, threshold=0.65, lower_percentile=1, upper_percentile=99):
