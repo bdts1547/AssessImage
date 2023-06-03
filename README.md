@@ -1,6 +1,18 @@
-# AssessImage
+<div align="center">
+  <h1> Assess Image Quality </h1>
+</div>
+
 ## Description
-  The application will evaluate the image quality based on 4 criteria of backlit, contrast, blur, composition.
+A good photo is one where factors such as backlit, blur, contrast, and composition are well balanced, creating an aesthetically pleasing image. Specifically, a good photo should have the following characteristics:
++ Backlight: adjust the lighting appropriately to avoid shadows or glare on the subject in the photo. (0-100)
++ Blur: the photo should be taken clearly, without blur or blur. (0-100)
++ Contrast: increase the contrast in the image so that details are clearly distinguished, helping to increase bold, sharp dynamics. (0-100)
++ Layout: arrange the subjects in the frame so that it is harmonious, beautiful and creates a sense of sublimation for the viewer.
+  - One-third
+  - Center
+  - Symmetry
+
+The application will evaluate the image quality based on 4 criteria of backlit, contrast, blur nad layout.
 
 ## Installation
 - Clone project
@@ -30,6 +42,7 @@
 
 
 ## Run
+
 - Run with streamlit
   ```
     conda activate my_env
@@ -39,4 +52,7 @@
 ## Demo
 Input          |  Output
 :-------------------------:|:-------------------------:
-![](https://...Dark.png)  |  ![](https://...Ocean.png)
+![](img/symmetry_48.png)  |  ![](img/sym48.png)
+
+## Architecture
+
