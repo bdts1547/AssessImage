@@ -64,3 +64,4 @@ Input          |  Output
 - **Layout**: 
   + **Onethird, Center**: use [TRACER](https://ojs.aaai.org/index.php/AAAI/article/view/21633) ([RGB Salient Object Detection](https://paperswithcode.com/task/salient-object-detection) model) to detect objects in the image, then determine the position of objects to find the appropriate composition.
   + **Symmetry**: use a method for measuring symmetry in images by [using filter responses from Convolutional Neural Networks (CNNs)](https://www.mdpi.com/2073-8994/8/12/144).
+  + **Score**: use the scores of backlit, blur, contrast and composition as features, then feed into the Linear Regression model for scoring.
