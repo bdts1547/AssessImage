@@ -30,6 +30,7 @@
 
 
 ## Run
+
 - Run with streamlit
   ```
     conda activate my_env
@@ -39,4 +40,4 @@
 ## Demo
 Input          |  Output
 :-------------------------:|:-------------------------:
-![](https://...Dark.png)  |  ![](https://...Ocean.png)
+![](img/symmetry_48.png)  |  ![](img/sym48.png)
