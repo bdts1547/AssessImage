@@ -8,9 +8,9 @@ A good photo is one where factors such as backlit, blur, contrast, and compositi
 + **Blur**: the photo should be taken clearly, without blur or blur. (0-100)
 + **Contrast**: increase the contrast in the image so that details are clearly distinguished, helping to increase bold, sharp dynamics. (0-100)
 + **Layout**: arrange the subjects in the frame so that it is harmonious, beautiful and creates a sense of sublimation for the viewer.
-  - One-third
-  - Center
-  - Symmetry
+  - [Onethird](Rule of thirds)
+  - [Center](https://snapshot.canon-asia.com/article/eng/part-3-composition-basics-center-composition-and-symmetrical-composition#:~:text=Centre%20composition%3A%20The%20most%20powerful,middle%20of%20the%20image%20frame.)
+  - [Symmetry](https://snapshot.canon-asia.com/article/eng/part-3-composition-basics-center-composition-and-symmetrical-composition#:~:text=Centre%20composition%3A%20The%20most%20powerful,middle%20of%20the%20image%20frame.)
 
 The application will evaluate the image quality based on 4 criteria of backlit, contrast, blur nad layout.
 
