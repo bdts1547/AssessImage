@@ -34,7 +34,7 @@ The application will evaluate the image quality based on 4 criteria of backlit, 
     conda activate my_env
     pip install -r requirements.txt
   ```
-- Create environment python 2.7.18 with name "py27" to call symmetry detection
+- Create environment python 2.7.18 with name "py27" to create sub shell for calling symmetry detection
   ```
     conda create -n py27 python=2.7.18 -y
     conda activate py27
