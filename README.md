@@ -35,3 +35,8 @@
     conda activate my_env
     streamlit run streamlit_app.py
   ```
+  
+## Demo
+Input          |  Output
+:-------------------------:|:-------------------------:
+![](https://...Dark.png)  |  ![](https://...Ocean.png)
