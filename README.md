@@ -4,10 +4,10 @@
 
 ## Description
 A good photo is one where factors such as backlit, blur, contrast, and composition are well balanced, creating an aesthetically pleasing image. Specifically, a good photo should have the following characteristics:
-+ Backlight: adjust the lighting appropriately to avoid shadows or glare on the subject in the photo. (0-100)
-+ Blur: the photo should be taken clearly, without blur or blur. (0-100)
-+ Contrast: increase the contrast in the image so that details are clearly distinguished, helping to increase bold, sharp dynamics. (0-100)
-+ Layout: arrange the subjects in the frame so that it is harmonious, beautiful and creates a sense of sublimation for the viewer.
++ **Backlight**: adjust the lighting appropriately to avoid shadows or glare on the subject in the photo. (0-100)
++ **Blur**: the photo should be taken clearly, without blur or blur. (0-100)
++ **Contrast**: increase the contrast in the image so that details are clearly distinguished, helping to increase bold, sharp dynamics. (0-100)
++ **Layout**: arrange the subjects in the frame so that it is harmonious, beautiful and creates a sense of sublimation for the viewer.
   - One-third
   - Center
   - Symmetry
@@ -15,6 +15,7 @@ A good photo is one where factors such as backlit, blur, contrast, and compositi
 The application will evaluate the image quality based on 4 criteria of backlit, contrast, blur nad layout.
 
 ## Installation
+#### Window
 - Clone project
   ```
     git clone https://github.com/bdts1547/AssessImage.git
@@ -43,7 +44,7 @@ The application will evaluate the image quality based on 4 criteria of backlit, 
 
 ## Run
 
-- Run with streamlit
+- Run with [streamlit](https://streamlit.io/)
   ```
     conda activate my_env
     streamlit run streamlit_app.py
@@ -55,4 +56,11 @@ Input          |  Output
 ![](img/symmetry_48.png)  |  ![](img/sym48.png)
 
 ## Architecture
+![](img/ArchitectureAIQ.png)
 
+- **Backlit**: [feature extraction from YC<sub>B</sub>C<sub>R</sub> color space](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/8292/1/Detection-of-backlight-images-using-chrominance/10.1117/12.906114.short?SSO=1), then feed into [SVM](https://en.wikipedia.org/wiki/Support_vector_machine) for backlit image quantification.
+- **Blur**: use edge operators ([Sobel](https://en.wikipedia.org/wiki/Sobel_operator), [Robert](https://en.wikipedia.org/wiki/Roberts_cross), [Laplacian](https://en.wikipedia.org/wiki/Laplace_operator)) for feature extraction, then feed into [SVM](https://en.wikipedia.org/wiki/Support_vector_machine) for blur image quantification.
+- **Contrast**: [an image whose pixel intensity distribution occupies less than 35% of domain [0, 255]](https://www.geeksforgeeks.org/detecting-low-contrast-images-with-opencv-scikit-image-and-python/) will be considered as low contrast image.
+- **Layout**: 
+  + **Onethird, Center**: use [TRACER](https://ojs.aaai.org/index.php/AAAI/article/view/21633) ([RGB Salient Object Detection](https://paperswithcode.com/task/salient-object-detection) model) to detect objects in the image, then determine the position of objects to find the appropriate composition.
+  + **Symmetry**: use a method for measuring symmetry in images by [using filter responses from Convolutional Neural Networks (CNNs)](https://www.mdpi.com/2073-8994/8/12/144).
